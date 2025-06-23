@@ -1,0 +1,43 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Marcas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Marcas</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-list>
+    @for(brand of brandsList; track brand.id) {
+    <ion-item>
+      <ion-text class="brand-info">
+        <h2>{{ brand.name }}</h2>
+        <h3><strong>País:</strong> {{ brand.country }}</h3>
+        <ion-button size="small" [routerLink]="['edit', brand.id]">
+          <ion-icon name="create" slot="start"></ion-icon>
+          Editar
+        </ion-button>
+        <ion-button size="small" (click)="remove(brand)">
+          <ion-icon name="trash" slot="end"></ion-icon>
+          Excluir
+        </ion-button>
+      </ion-text>
+    </ion-item>
+    }
+    @empty {
+    <ion-item>Lista de marcas vazia, cadastre uma nova marca!</ion-item>
+    }
+  </ion-list>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button [routerLink]="['new']">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

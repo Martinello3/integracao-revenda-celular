@@ -1,0 +1,111 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/sales"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalhes da Venda</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  @if(sale) {
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Venda #{{ sale.id }}</ion-card-title>
+        <ion-card-subtitle>
+          <ion-badge [color]="getStatusColor(sale.status)">{{ getStatusLabel(sale.status) }}</ion-badge>
+          <ion-badge color="primary">{{ getPaymentMethodLabel(sale.paymentMethod) }}</ion-badge>
+        </ion-card-subtitle>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-label>
+              <h2>Data da Venda</h2>
+              <p>{{ sale.date | date: 'dd/MM/yyyy' }}</p>
+            </ion-label>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label>
+              <h2>Cliente</h2>
+              <p>{{ sale.customer.name }}</p>
+              <p>{{ sale.customer.email }}</p>
+              <p>{{ sale.customer.phone }}</p>
+            </ion-label>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label>
+              <h2>Loja</h2>
+              <p>{{ sale.store.name }}</p>
+              <p *ngIf="sale.store.address">{{ sale.store.address }}</p>
+              <p *ngIf="sale.store.city || sale.store.state">
+                {{ sale.store.city || '' }}{{ sale.store.city && sale.store.state ? '/' : '' }}{{ sale.store.state || '' }}
+              </p>
+              <p *ngIf="sale.store.phone">Telefone: {{ sale.store.phone }}</p>
+              <p *ngIf="sale.store.manager">Gerente: {{ sale.store.manager }}</p>
+            </ion-label>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label>
+              <h2>Vendedor</h2>
+              <p>{{ sale.seller }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+    
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Itens da Venda</ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <ion-list>
+          @for(item of sale.items; track $index) {
+            <ion-item>
+              <ion-label>
+                <h2>{{ item.productType === 'phone' ? 'Celular' : 'Acessório' }}: 
+                  {{ getProductName(item.product, item.productType) }}
+                </h2>
+                <p>Quantidade: {{ item.quantity }}</p>
+                <p>Preço Unitário: {{ item.unitPrice | currency: 'BRL' }}</p>
+                <h3>Subtotal: {{ item.subtotal | currency: 'BRL' }}</h3>
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+        
+        <div class="total-section">
+          <h2>Valor Total: {{ sale.totalValue | currency: 'BRL' }}</h2>
+        </div>
+      </ion-card-content>
+    </ion-card>
+    
+    <div class="action-buttons">
+      <ion-button expand="block" [routerLink]="['/sales/edit', sale.id]" [disabled]="sale.status === 'canceled'">
+        <ion-icon name="create" slot="start"></ion-icon>
+        Editar Venda
+      </ion-button>
+      
+      <ion-button expand="block" color="danger" (click)="cancelSale()" [disabled]="sale.status === 'canceled'">
+        <ion-icon name="close-circle" slot="start"></ion-icon>
+        Cancelar Venda
+      </ion-button>
+      
+      <ion-button expand="block" fill="outline" routerLink="/sales">
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Voltar para Lista
+      </ion-button>
+    </div>
+  } @else {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Carregando detalhes da venda...</p>
+    </div>
+  }
+</ion-content>

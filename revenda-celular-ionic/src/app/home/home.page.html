@@ -1,0 +1,122 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <ion-card class="summary-card">
+      <ion-card-header>
+        <ion-card-title>Resumo Financeiro</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="financial-summary">
+          <div class="summary-item">
+            <h2>{{ totalRevenue | currency:'BRL' }}</h2>
+            <p>Faturamento Total</p>
+          </div>
+          <div class="summary-item">
+            <h2>{{ monthlyRevenue | currency:'BRL' }}</h2>
+            <p>Faturamento do Mês</p>
+          </div>
+          <div class="summary-item">
+            <h2>{{ weeklyRevenue | currency:'BRL' }}</h2>
+            <p>Faturamento da Semana</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="stats-container">
+      <ion-card class="stats-card">
+        <ion-card-header>
+          <ion-card-title>Vendas</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="stats-grid">
+            <div class="stats-item">
+              <ion-icon name="calendar-outline" color="secondary"></ion-icon>
+              <h3>{{ totalSalesMonth }}</h3>
+              <p>Vendas no Mês</p>
+            </div>
+            <div class="stats-item">
+              <ion-icon name="today-outline" color="secondary"></ion-icon>
+              <h3>{{ totalSalesWeek }}</h3>
+              <p>Vendas na Semana</p>
+            </div>
+            <div class="stats-item">
+              <ion-icon name="trending-up-outline" color="secondary"></ion-icon>
+              <h3>{{ averageTicket | currency:'BRL' }}</h3>
+              <p>Ticket Médio</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stats-card">
+        <ion-card-header>
+          <ion-card-title>Produtos Mais Vendidos</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list lines="none">
+            @for(product of topProducts; track product.id) {
+              <ion-item>
+                <ion-icon name="phone-portrait-outline" slot="start" *ngIf="product.type === 'phone'"></ion-icon>
+                <ion-icon name="hardware-chip-outline" slot="start" *ngIf="product.type === 'accessory'"></ion-icon>
+                <ion-label>
+                  <h3>{{ product.name }}</h3>
+                  <p>{{ product.quantity }} unidades vendidas</p>
+                </ion-label>
+                <ion-note slot="end" color="secondary">{{ product.revenue | currency:'BRL' }}</ion-note>
+              </ion-item>
+            }
+            @empty {
+              <ion-item>
+                <ion-label>Nenhum produto vendido no período</ion-label>
+              </ion-item>
+            }
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <ion-card class="recent-sales-card">
+      <ion-card-header>
+        <ion-card-title>Últimas Vendas</ion-card-title>
+        <ion-button fill="clear" routerLink="/sales">
+          Ver Todas
+          <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          @for(sale of recentSales; track sale.id) {
+            <ion-item button [routerLink]="['/sales/details', sale.id]">
+              <ion-label>
+                <h2>Venda #{{ sale.id }}</h2>
+                <ion-text color="medium">{{ sale.date | date:'dd/MM/yyyy' }}</ion-text>
+                <p>Cliente: {{ sale.customer.name }}</p>
+                <p>Loja: {{ sale.store.name }}</p>
+              </ion-label>
+              <div class="sale-info" slot="end">
+                <ion-badge [color]="getStatusColor(sale.status)">{{ getStatusLabel(sale.status) }}</ion-badge>
+                <ion-text color="dark">
+                  <h3>{{ sale.totalValue | currency:'BRL' }}</h3>
+                </ion-text>
+              </div>
+            </ion-item>
+          }
+          @empty {
+            <ion-item>
+              <ion-label>Nenhuma venda recente</ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

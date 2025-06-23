@@ -1,0 +1,50 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Cadastro de Marcas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="form-container">
+    <form [formGroup]="brandForm">
+      <ion-list>
+        <ion-item>
+          <ion-input formControlName="name" labelPlacement="floating" label="Nome: " type="text"></ion-input>
+          <p>
+          @if(hasError('name', 'required')) {
+            O campo é obrigatório
+          }
+          @if(hasError('name', 'minlength')) {
+            O campo deve ter no mínimo 2 caracteres
+          }
+          @if(hasError('name', 'maxlength')) {
+            O campo deve ter no máximo 100 caracteres
+          }
+          </p>
+        </ion-item>
+        <ion-item>
+          <ion-input formControlName="country" labelPlacement="floating" label="País: " type="text"></ion-input>
+          <p>
+          @if(hasError('country', 'required')) {
+            O campo é obrigatório
+          }
+          @if(hasError('country', 'minlength')) {
+            O campo deve ter no mínimo 2 caracteres
+          }
+          @if(hasError('country', 'maxlength')) {
+            O campo deve ter no máximo 100 caracteres
+          }
+          </p>
+        </ion-item>
+      </ion-list>
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button [disabled]="brandForm.invalid" (click)="save()">
+          <ion-icon name="checkmark"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </form>
+  </div>
+</ion-content>

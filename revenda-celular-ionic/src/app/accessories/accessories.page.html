@@ -1,0 +1,54 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Acessórios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Acessórios</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-list>
+    @for(accessory of accessoriesList; track accessory.id) {
+    <ion-item>
+      <ion-text class="accessory-info">
+        <h2>{{ accessory.name }}</h2>
+        <h3><strong>Categoria:</strong> {{ accessory.category }}</h3>
+        <h4><strong>Preço:</strong> {{ accessory.price | currency: 'BRL' }}</h4>
+        <h4><strong>Compatível com:</strong> 
+          @if(accessory.compatiblePhones && accessory.compatiblePhones.length > 0) {
+            @for(phone of accessory.compatiblePhones; track phone.id; let last = $last) {
+              {{ phone.model }}{{ !last ? ', ' : '' }}
+            }
+          } @else {
+            Todos os modelos
+          }
+        </h4>
+        <h4><strong>Estoque:</strong> {{ accessory.stock }}</h4>
+        <ion-button size="small" [routerLink]="['edit', accessory.id]">
+          <ion-icon name="create" slot="start"></ion-icon>
+          Editar
+        </ion-button>
+        <ion-button size="small" (click)="remove(accessory)">
+          <ion-icon name="trash" slot="end"></ion-icon>
+          Excluir
+        </ion-button>
+      </ion-text>
+    </ion-item>
+    }
+    @empty {
+    <ion-item>Lista de acessórios vazia, cadastre um novo acessório!</ion-item>
+    }
+  </ion-list>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button [routerLink]="['new']">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

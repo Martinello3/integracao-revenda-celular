@@ -1,0 +1,1234 @@
+{
+	"info": {
+		"_postman_id": "679fbccc-ece8-4d31-8043-cb49fea9c1a8",
+		"name": "Revenda",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36432589"
+	},
+	"item": [
+		{
+			"name": "Telefone",
+			"item": [
+				{
+					"name": "Regras de Negócio",
+					"item": [
+						{
+							"name": "REGRA 2 - Não permitir redução de preço superior a 50%",
+							"item": [
+								{
+									"name": "Passo 2 - Tentar reduzir o preço em mais de 50%",
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"price\": 4000.00\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/phones/8",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"phones",
+												"8"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Passo 1 - Criar um celular com preço alto",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"model\": \"iPhone Teste Preço\",\r\n  \"image\": \"https://example.com/iphone-teste.jpg\",\r\n  \"releaseDate\": \"2024-01-01\",\r\n  \"price\": 10000.00,\r\n  \"category\": \"Smartphone\",\r\n  \"brandId\": 2\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/phones",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"phones"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "REGRA 3 - Não permitir deletar telefones que estão em vendas",
+							"item": [
+								{
+									"name": "Passo 2 - Tentar deletar o telefone adicionado na venda",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"price\": 4000.00\r\n}"
+										},
+										"url": {
+											"raw": "http://localhost:3000/phones/1",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"phones",
+												"1"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Passo 1 - Criar uma venda com o telefone",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"customerId\": 1,\r\n  \"storeId\": 1,\r\n  \"paymentMethod\": \"pix\",\r\n  \"seller\": \"Vendedor Teste\",\r\n  \"items\": [\r\n    {\r\n      \"productId\": 1,\r\n      \"productType\": \"phone\",\r\n      \"quantity\": 1,\r\n      \"unitPrice\": 2999.99,\r\n      \"subtotal\": 2999.99\r\n    }\r\n  ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/sales",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"sales"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "REGRA 1 - Não permitir celulares com mesmo modelo da mesma marca",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"model\": \"Galaxy Teste\",\r\n  \"image\": \"https://example.com/galaxy-teste.jpg\",\r\n  \"releaseDate\": \"2024-01-01\",\r\n  \"price\": 2999.99,\r\n  \"category\": \"Smartphone\",\r\n  \"brandId\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/phones",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"phones"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Criar Novo Celular",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"model\": \"Galaxy S24 Ultra\",\r\n  \"image\": \"https://example.com/galaxy-s24-ultra.jpg\",\r\n  \"releaseDate\": \"2024-01-15\",\r\n  \"price\": 8999.99,\r\n  \"category\": \"Smartphone\",\r\n  \"brandId\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/phones",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"phones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Todos os Celulares",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/phones",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"phones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Celular por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/phones/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"phones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Celular",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"price\": 3499.99,\r\n  \"image\": \"https://example.com/galaxy-s23-new.jpg\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/phones/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"phones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Celular",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/phones/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"phones",
+								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Acessório",
+			"item": [
+				{
+					"name": "Regras de Negócio",
+					"item": [
+						{
+							"name": "REGRA 3: Não permitir reduzir estoque abaixo de 0",
+							"item": [
+								{
+									"name": "Passo 1 - Criar um acessório com estoque baixo",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"name\": \"Acessório Estoque Baixo\",\r\n  \"description\": \"Para teste de estoque\",\r\n  \"price\": 99.99,\r\n  \"category\": \"Teste\",\r\n  \"image\": \"https://example.com/estoque.jpg\",\r\n  \"stock\": 5\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/accessories",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"accessories"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Passo 2 - Reduzir estoque além do disponível",
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"quantity\": -10\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/accessories/8/stock",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"accessories",
+												"8",
+												"stock"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "REGRA 1 - Não permitir criar acessórios com preço negativo",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Acessório Teste Negativo\",\r\n  \"description\": \"Teste de preço negativo\",\r\n  \"price\": -50.00,\r\n  \"category\": \"Teste\",\r\n  \"image\": \"https://example.com/teste.jpg\",\r\n  \"stock\": 10\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/accessories",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"accessories"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "REGRA 2 - Não retornar acessórios sem estoque",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/accessories/stock/only-available",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"accessories",
+										"stock",
+										"only-available"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Criar Novo Acessório",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"AirPods Pro 2\",\r\n  \"description\": \"Fones sem fio com cancelamento ativo de ruído\",\r\n  \"price\": 1899.99,\r\n  \"category\": \"Fone\",\r\n  \"image\": \"https://example.com/airpods-pro-2.jpg\",\r\n  \"stock\": 15\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/accessories",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"accessories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Todos os Acessórios",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"AirPods Pro 2\",\r\n  \"description\": \"Fones sem fio com cancelamento ativo de ruído\",\r\n  \"price\": 1899.99,\r\n  \"category\": \"Fone\",\r\n  \"image\": \"https://example.com/airpods-pro-2.jpg\",\r\n  \"stock\": 15\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/accessories",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"accessories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Acessório por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/accessories/1",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"accessories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Acessório",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"price\": 79.99,\r\n  \"stock\": 45\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/accessories/1",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"accessories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Acessório",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/accessories/9",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"accessories",
+								"9"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loja",
+			"item": [
+				{
+					"name": "Criar Nova Loja",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Loja Barra\",\r\n  \"address\": \"Av. das Américas, 4666 - Barra da Tijuca\",\r\n  \"city\": \"Rio de Janeiro\",\r\n  \"state\": \"RJ\",\r\n  \"phone\": \"(21) 3333-4444\",\r\n  \"manager\": \"Carlos Oliveira\",\r\n  \"isHeadquarters\": false,\r\n  \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/stores",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Todas as Lojas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/stores",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Loja por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/stores/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"stores",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Loja",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"phone\": \"(11) 1234-9999\",\r\n  \"manager\": \"João Silva Santos\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/stores/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"stores",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Loja",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/stores/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"stores",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cliente",
+			"item": [
+				{
+					"name": "Regras de Negócio",
+					"item": [
+						{
+							"name": "REGRA 2 - Não permitir downgrade de VIP para regular",
+							"item": [
+								{
+									"name": "Passo 1 - Criar um cliente VIP",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"name\": \"Cliente VIP\",\r\n  \"email\": \"cliente.vip@email.com\",\r\n  \"phone\": \"(11) 99999-8888\",\r\n  \"birthDate\": \"1980-01-01\",\r\n  \"address\": \"Rua VIP, 123\",\r\n  \"customerType\": \"vip\",\r\n  \"active\": true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/customers",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"customers"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Passo 2 - Fazer downgrade para regular",
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"customerType\": \"regular\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/customers/7",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"customers",
+												"7"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "REGRA 3 - Não permitir deletar clientes com vendas",
+							"item": [
+								{
+									"name": "Passo 1 - Criar uma venda para o cliente",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"customerId\": 1,\r\n  \"storeId\": 1,\r\n  \"paymentMethod\": \"pix\",\r\n  \"seller\": \"Vendedor Teste\",\r\n  \"items\": [\r\n    {\r\n      \"productId\": 1,\r\n      \"productType\": \"phone\",\r\n      \"quantity\": 1,\r\n      \"unitPrice\": 1000.00,\r\n      \"subtotal\": 1000.00\r\n    }\r\n  ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/sales",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"sales"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Passo 2 - Tentar deletar o cliente",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"customerId\": 1,\r\n  \"storeId\": 1,\r\n  \"paymentMethod\": \"pix\",\r\n  \"seller\": \"João Vendedor\",\r\n  \"items\": [\r\n    {\r\n      \"productId\": 1,\r\n      \"productType\": \"phone\",\r\n      \"quantity\": 1,\r\n      \"unitPrice\": 3999.99,\r\n      \"subtotal\": 3999.99\r\n    },\r\n    {\r\n      \"productId\": 1,\r\n      \"productType\": \"accessory\",\r\n      \"quantity\": 2,\r\n      \"unitPrice\": 89.99,\r\n      \"subtotal\": 179.98\r\n    }\r\n  ]\r\n}"
+										},
+										"url": {
+											"raw": "http://localhost:3000/customers/1",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"customers",
+												"1"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "REGRA 1 - Não permitir emails duplicados",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Cliente Original\",\r\n  \"email\": \"teste.duplicacao@email.com\",\r\n  \"phone\": \"(11) 99999-1111\",\r\n  \"birthDate\": \"1990-01-01\",\r\n  \"address\": \"Rua Original, 123\",\r\n  \"customerType\": \"regular\",\r\n  \"active\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/customers",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"customers"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Criar Novo Cliente",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Maria Fernanda Silva\",\r\n  \"email\": \"maria.fernanda@email.com\",\r\n  \"phone\": \"(11) 99999-5555\",\r\n  \"birthDate\": \"1995-07-20\",\r\n  \"address\": \"Rua das Palmeiras, 456 - Vila Madalena\",\r\n  \"customerType\": \"premium\",\r\n  \"active\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/customers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Todos os Clientes",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Loja Barra\",\r\n  \"address\": \"Av. das Américas, 4666 - Barra da Tijuca\",\r\n  \"city\": \"Rio de Janeiro\",\r\n  \"state\": \"RJ\",\r\n  \"phone\": \"(21) 3333-4444\",\r\n  \"manager\": \"Carlos Oliveira\",\r\n  \"isHeadquarters\": false,\r\n  \"status\": \"active\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/customers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cliente por ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Loja Barra\",\r\n  \"address\": \"Av. das Américas, 4666 - Barra da Tijuca\",\r\n  \"city\": \"Rio de Janeiro\",\r\n  \"state\": \"RJ\",\r\n  \"phone\": \"(21) 3333-4444\",\r\n  \"manager\": \"Carlos Oliveira\",\r\n  \"isHeadquarters\": false,\r\n  \"status\": \"active\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/customers/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"customers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Cliente",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"phone\": \"(11) 99999-1122\",\r\n  \"address\": \"Rua A, 123 - Apto 45\",\r\n  \"customerType\": \"vip\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/customers/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"customers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Cliente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Loja Barra\",\r\n  \"address\": \"Av. das Américas, 4666 - Barra da Tijuca\",\r\n  \"city\": \"Rio de Janeiro\",\r\n  \"state\": \"RJ\",\r\n  \"phone\": \"(21) 3333-4444\",\r\n  \"manager\": \"Carlos Oliveira\",\r\n  \"isHeadquarters\": false,\r\n  \"status\": \"active\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/customers/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"customers",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Marca",
+			"item": [
+				{
+					"name": "Regras de Negócio",
+					"item": [
+						{
+							"name": "REGRA 1 - Não permitir marcas duplicadas",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Samsung\",\r\n  \"country\": \"China\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/brands",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"brands"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Criar Nova Marca",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"OnePlus\",\r\n  \"country\": \"China\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/brands",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"brands"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Todas as Marcas",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Loja Barra\",\r\n  \"address\": \"Av. das Américas, 4666 - Barra da Tijuca\",\r\n  \"city\": \"Rio de Janeiro\",\r\n  \"state\": \"RJ\",\r\n  \"phone\": \"(21) 3333-4444\",\r\n  \"manager\": \"Carlos Oliveira\",\r\n  \"isHeadquarters\": false,\r\n  \"status\": \"active\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/brands",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"brands"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Marca por ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Loja Barra\",\r\n  \"address\": \"Av. das Américas, 4666 - Barra da Tijuca\",\r\n  \"city\": \"Rio de Janeiro\",\r\n  \"state\": \"RJ\",\r\n  \"phone\": \"(21) 3333-4444\",\r\n  \"manager\": \"Carlos Oliveira\",\r\n  \"isHeadquarters\": false,\r\n  \"status\": \"active\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/brands/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"brands",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Marca",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Samsung Electronics\",\r\n  \"country\": \"Coreia do Sul\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/brands/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"brands",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Marca",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Loja Barra\",\r\n  \"address\": \"Av. das Américas, 4666 - Barra da Tijuca\",\r\n  \"city\": \"Rio de Janeiro\",\r\n  \"state\": \"RJ\",\r\n  \"phone\": \"(21) 3333-4444\",\r\n  \"manager\": \"Carlos Oliveira\",\r\n  \"isHeadquarters\": false,\r\n  \"status\": \"active\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/brands/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"brands",
+								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Venda",
+			"item": [
+				{
+					"name": "Criar Nova Venda",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customerId\": 1,\r\n  \"storeId\": 1,\r\n  \"paymentMethod\": \"pix\",\r\n  \"seller\": \"João Vendedor\",\r\n  \"items\": [\r\n    {\r\n      \"productId\": 1,\r\n      \"productType\": \"phone\",\r\n      \"quantity\": 1,\r\n      \"unitPrice\": 3999.99,\r\n      \"subtotal\": 3999.99\r\n    },\r\n    {\r\n      \"productId\": 1,\r\n      \"productType\": \"accessory\",\r\n      \"quantity\": 2,\r\n      \"unitPrice\": 89.99,\r\n      \"subtotal\": 179.98\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/sales",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Todas as Vendas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/sales",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Venda por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/sales/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"sales",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Venda",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"seller\": \"Maria Vendedora\",\r\n  \"paymentMethod\": \"debit\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/sales/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"sales",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Venda",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Loja Barra\",\r\n  \"address\": \"Av. das Américas, 4666 - Barra da Tijuca\",\r\n  \"city\": \"Rio de Janeiro\",\r\n  \"state\": \"RJ\",\r\n  \"phone\": \"(21) 3333-4444\",\r\n  \"manager\": \"Carlos Oliveira\",\r\n  \"isHeadquarters\": false,\r\n  \"status\": \"active\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/sales/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"sales",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,184 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/sales"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ saleId ? 'Editar Venda' : 'Nova Venda' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="form-container">
+    <form [formGroup]="saleForm" (ngSubmit)="save()">
+      <ion-list>
+        <ion-item>
+          <ion-input type="date" formControlName="date" labelPlacement="floating" label="Data da Venda" [max]="maxDate"></ion-input>
+          <p>
+            @if(hasError('date', 'required')) {
+              A data da venda é obrigatória
+            }
+          </p>
+        </ion-item>
+
+        <ion-item>
+          <ion-select formControlName="customer" labelPlacement="floating" label="Cliente" [compareWith]="compareWith">
+            @for(customer of customersList; track customer.id) {
+              <ion-select-option [value]="customer">{{ customer.name }}</ion-select-option>
+            }
+          </ion-select>
+          <p>
+            @if(hasError('customer', 'required')) {
+              O cliente é obrigatório
+            }
+          </p>
+        </ion-item>
+
+        <ion-item>
+          <ion-select formControlName="store" labelPlacement="floating" label="Loja" [compareWith]="compareWith">
+            @for(store of storesList; track store.id) {
+              <ion-select-option [value]="store">{{ store.name }}</ion-select-option>
+            }
+          </ion-select>
+          <p>
+            @if(hasError('store', 'required')) {
+              A loja é obrigatória
+            }
+          </p>
+        </ion-item>
+
+        <ion-item>
+          <ion-select formControlName="paymentMethod" labelPlacement="floating" label="Método de Pagamento">
+            @for(method of paymentMethods; track method.value) {
+              <ion-select-option [value]="method.value">{{ method.label }}</ion-select-option>
+            }
+          </ion-select>
+          <p>
+            @if(hasError('paymentMethod', 'required')) {
+              O método de pagamento é obrigatório
+            }
+          </p>
+        </ion-item>
+
+        <ion-item>
+          <ion-select formControlName="status" labelPlacement="floating" label="Status">
+            @for(status of saleStatus; track status.value) {
+              <ion-select-option [value]="status.value">{{ status.label }}</ion-select-option>
+            }
+          </ion-select>
+          <p>
+            @if(hasError('status', 'required')) {
+              O status é obrigatório
+            }
+          </p>
+        </ion-item>
+
+        <ion-item>
+          <ion-input formControlName="seller" labelPlacement="floating" label="Vendedor" type="text"></ion-input>
+          <p>
+            @if(hasError('seller', 'required')) {
+              O vendedor é obrigatório
+            }
+          </p>
+        </ion-item>
+
+        <ion-item-divider>
+          <ion-label>Itens da Venda</ion-label>
+          <ion-button slot="end" size="small" class="add-item-button" fill="outline" (click)="addItem()">
+            <ion-icon name="add"></ion-icon>
+            Adicionar Item
+          </ion-button>
+        </ion-item-divider>
+
+        <div formArrayName="items">
+          @for(item of itemsFormArray.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="item-form">
+              <ion-item>
+                <ion-select formControlName="productType" labelPlacement="floating" label="Tipo de Produto">
+                  <ion-select-option value="phone">Celular</ion-select-option>
+                  <ion-select-option value="accessory">Acessório</ion-select-option>
+                </ion-select>
+                <p>
+                  @if(hasItemError(i, 'productType', 'required')) {
+                    O tipo de produto é obrigatório
+                  }
+                </p>
+              </ion-item>
+
+              <ion-item>
+                <ion-select formControlName="product" labelPlacement="floating" label="Produto" [compareWith]="compareWith">
+                  @if(getProductType(i) === 'phone') {
+                    @for(phone of phonesList; track phone.id) {
+                      <ion-select-option [value]="phone">{{ phone.model }} - {{ phone.price | currency: 'BRL' }}</ion-select-option>
+                    }
+                  } @else {
+                    @for(accessory of accessoriesList; track accessory.id) {
+                      <ion-select-option [value]="accessory">{{ accessory.name }} - {{ accessory.price | currency: 'BRL' }}</ion-select-option>
+                    }
+                  }
+                </ion-select>
+                <p>
+                  @if(hasItemError(i, 'product', 'required')) {
+                    O produto é obrigatório
+                  }
+                </p>
+              </ion-item>
+
+              <ion-item>
+                <ion-input formControlName="quantity" labelPlacement="floating" label="Quantidade" type="number" min="1"></ion-input>
+                <p>
+                  @if(hasItemError(i, 'quantity', 'required')) {
+                    A quantidade é obrigatória
+                  }
+                  @if(hasItemError(i, 'quantity', 'min')) {
+                    A quantidade deve ser pelo menos 1
+                  }
+                </p>
+              </ion-item>
+
+              <ion-item>
+                <ion-input formControlName="unitPrice" labelPlacement="floating" label="Preço Unitário" type="text" 
+                  [maskito]="priceMask" [maskitoElement]="maskitoElement"></ion-input>
+                <p>
+                  @if(hasItemError(i, 'unitPrice', 'required')) {
+                    O preço unitário é obrigatório
+                  }
+                </p>
+              </ion-item>
+
+              <ion-item>
+                <ion-input formControlName="subtotal" labelPlacement="floating" label="Subtotal" type="text" readonly
+                  [maskito]="priceMask" [maskitoElement]="maskitoElement"></ion-input>
+              </ion-item>
+
+              <div class="item-actions">
+                <ion-button fill="clear" color="danger" (click)="removeItem(i)">
+                  <ion-icon name="trash"></ion-icon>
+                  Remover
+                </ion-button>
+              </div>
+            </div>
+          }
+          @empty {
+            <ion-item>
+              <ion-label color="medium">Nenhum item adicionado</ion-label>
+            </ion-item>
+          }
+        </div>
+
+        <ion-item>
+          <ion-input formControlName="totalValue" labelPlacement="floating" label="Valor Total" type="text" readonly
+            [maskito]="priceMask" [maskitoElement]="maskitoElement"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <div class="form-buttons">
+        <ion-button expand="block" type="submit" [disabled]="saleForm.invalid || itemsFormArray.length === 0">
+          Salvar
+        </ion-button>
+        <ion-button expand="block" fill="outline" routerLink="/sales">
+          Cancelar
+        </ion-button>
+      </div>
+    </form>
+  </div>
+</ion-content>
