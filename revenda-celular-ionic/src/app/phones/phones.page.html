@@ -17,24 +17,25 @@
   <ion-list>
     @for(phone of phonesList; track phone.id) {
     <ion-item>
-      <ion-text class="phone-info">
+      <ion-avatar slot="start">
+        <img [src]="phone.image" [alt]="phone.model" (error)="onImageError($event)" />
+      </ion-avatar>
+      <ion-label>
         <h2>{{ phone.model }}</h2>
         <h3><strong>Categoria:</strong> {{ phone.category }}</h3>
-        <h4><strong>Lançamento:</strong> {{ phone.releaseDate | date: 'dd/MM/yyyy' }}</h4>
-        <h4><strong>Preço:</strong> {{ phone.price | currency: 'BRL' }}</h4>
-        <h4>
-          <strong>Marca:</strong>
-          {{ phone.brand?.name || 'Não informada' }}
-        </h4>
-        <ion-button size="small" [routerLink]="['edit', phone.id]">
-          <ion-icon name="create" slot="start"></ion-icon>
-          Editar
-        </ion-button>
-        <ion-button size="small" (click)="remove(phone)">
-          <ion-icon name="trash" slot="end"></ion-icon>
-          Excluir
-        </ion-button>
-      </ion-text>
+        <p><strong>Lançamento:</strong> {{ phone.releaseDate | date: 'dd/MM/yyyy' }}</p>
+        <p><strong>Preço:</strong> {{ phone.price | currency: 'BRL' }}</p>
+        <p><strong>Marca:</strong> {{ phone.brand?.name || 'Não informada' }}</p>
+        @if(phone.stock !== undefined) {
+          <p><strong>Estoque:</strong> {{ phone.stock }} unidades</p>
+        }
+      </ion-label>
+      <ion-button slot="end" size="small" [routerLink]="['edit', phone.id]">
+        <ion-icon name="create" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button slot="end" size="small" color="danger" (click)="remove(phone)">
+        <ion-icon name="trash" slot="icon-only"></ion-icon>
+      </ion-button>
     </ion-item>
     }
     @empty {

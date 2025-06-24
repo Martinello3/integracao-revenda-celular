@@ -17,11 +17,14 @@
   <ion-list>
     @for(accessory of accessoriesList; track accessory.id) {
     <ion-item>
-      <ion-text class="accessory-info">
+      <ion-avatar slot="start">
+        <img [src]="accessory.image" [alt]="accessory.name" (error)="onImageError($event)" />
+      </ion-avatar>
+      <ion-label>
         <h2>{{ accessory.name }}</h2>
         <h3><strong>Categoria:</strong> {{ accessory.category }}</h3>
-        <h4><strong>Preço:</strong> {{ accessory.price | currency: 'BRL' }}</h4>
-        <h4><strong>Compatível com:</strong> 
+        <p><strong>Preço:</strong> {{ accessory.price | currency: 'BRL' }}</p>
+        <p><strong>Compatível com:</strong>
           @if(accessory.compatiblePhones && accessory.compatiblePhones.length > 0) {
             @for(phone of accessory.compatiblePhones; track phone.id; let last = $last) {
               {{ phone.model }}{{ !last ? ', ' : '' }}
@@ -29,17 +32,16 @@
           } @else {
             Todos os modelos
           }
-        </h4>
-        <h4><strong>Estoque:</strong> {{ accessory.stock }}</h4>
-        <ion-button size="small" [routerLink]="['edit', accessory.id]">
-          <ion-icon name="create" slot="start"></ion-icon>
-          Editar
-        </ion-button>
-        <ion-button size="small" (click)="remove(accessory)">
-          <ion-icon name="trash" slot="end"></ion-icon>
-          Excluir
-        </ion-button>
-      </ion-text>
+        </p>
+        <p><strong>Estoque:</strong> {{ accessory.stock }} unidades</p>
+        <p class="description"><strong>Descrição:</strong> {{ accessory.description }}</p>
+      </ion-label>
+      <ion-button slot="end" size="small" [routerLink]="['edit', accessory.id]">
+        <ion-icon name="create" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button slot="end" size="small" color="danger" (click)="remove(accessory)">
+        <ion-icon name="trash" slot="icon-only"></ion-icon>
+      </ion-button>
     </ion-item>
     }
     @empty {

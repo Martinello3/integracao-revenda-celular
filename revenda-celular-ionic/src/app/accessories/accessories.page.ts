@@ -83,4 +83,9 @@ export class AccessoriesPage implements OnInit, ViewWillEnter,
       ]
     }).then(alert => alert.present());
   }
+
+  onImageError(event: any) {
+    // Substituir por imagem padrão quando houver erro
+    event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0xNSAxNUgyNVYyNUgxNVYxNVoiIGZpbGw9IiNDQ0NDQ0MiLz4KPHBhdGggZD0iTTE4IDE4SDIyVjIySDE4VjE4WiIgZmlsbD0iIzk5OTk5OSIvPgo8L3N2Zz4K';
+  }
 }
