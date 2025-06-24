@@ -25,11 +25,12 @@ export class PhoneService {
       throw new ConflictException(`Celular '${createPhoneDto.model}' já existe para esta marca`);
     }
 
-    // Garantir que price e brandId sejam numbers
+    // Garantir que price, brandId e stock sejam numbers
     const phoneData = {
       ...createPhoneDto,
       price: Number(createPhoneDto.price),
-      brandId: Number(createPhoneDto.brandId)
+      brandId: Number(createPhoneDto.brandId),
+      stock: Number(createPhoneDto.stock) || 0
     };
 
     const phone = this.phoneRepository.create(phoneData);
@@ -83,6 +84,9 @@ export class PhoneService {
     }
     if (updateData.brandId !== undefined) {
       updateData.brandId = Number(updateData.brandId);
+    }
+    if (updateData.stock !== undefined) {
+      updateData.stock = Number(updateData.stock);
     }
 
     return this.phoneRepository.update(id, updateData);

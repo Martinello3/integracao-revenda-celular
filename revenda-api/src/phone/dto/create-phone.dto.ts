@@ -5,4 +5,5 @@ export class CreatePhoneDto {
   price: number;
   category: string;
   brandId: number;
+  stock?: number;
 }

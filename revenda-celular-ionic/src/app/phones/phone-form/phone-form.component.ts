@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { dateMask, maskitoElement, parseDateMask, formatDateMask } from '../../core/constants/mask.constants';
 import { ApplicationValidators } from '../../core/validators/url.validator';
 import { PhoneService } from '../services/phone.service';
@@ -34,16 +34,29 @@ export class PhoneFormComponent implements OnInit {
 
   phoneForm: FormGroup = new FormGroup({
     model: new FormControl('', [
-      Validators.required, Validators.minLength(3), Validators.maxLength(150)
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(150),
+      this.modelValidator
     ]),
     image: new FormControl('', [
       Validators.required,
       ApplicationValidators.urlValidator
     ]),
-    releaseDate: new FormControl(''),
-    price: new FormControl(0, [Validators.required, Validators.min(0)]),
+    releaseDate: new FormControl('', [this.releaseDateValidator]),
+    price: new FormControl(0, [
+      Validators.required,
+      Validators.min(0),
+      this.priceValidator
+    ]),
     category: new FormControl('', Validators.required),
-    brandId: new FormControl(null, Validators.required)
+    brandId: new FormControl(null, Validators.required),
+    stock: new FormControl(0, [
+      Validators.required,
+      Validators.min(0),
+      Validators.pattern('^[0-9]*$'),
+      this.stockValidator
+    ])
   });
   phoneId!: number;
   brands: Brand[] = []
@@ -87,7 +100,8 @@ export class PhoneFormComponent implements OnInit {
               releaseDate: phone.releaseDate,
               price: priceValue,
               category: phone.category,
-              brandId: phone.brandId
+              brandId: phone.brandId,
+              stock: phone.stock || 0
             });
           }
         },
@@ -116,10 +130,7 @@ export class PhoneFormComponent implements OnInit {
   }
 
 
-  hasError(field: string, error: string) {
-    const formControl = this.phoneForm.get(field);
-    return formControl?.touched && formControl?.errors?.[error]
-  }
+
 
   save() {
     let { value } = this.phoneForm;
@@ -135,6 +146,8 @@ export class PhoneFormComponent implements OnInit {
     if (value.brandId) {
       value.brandId = +value.brandId;
     }
+    // Garantir que o estoque seja number
+    value.stock = Number(value.stock) || 0;
     console.log(value);
     this.phoneService.save({
       ...value,
@@ -156,5 +169,59 @@ export class PhoneFormComponent implements OnInit {
         console.error(error);
       }
     });
+  }
+
+  hasError(field: string, error: string): boolean {
+    const formControl = this.phoneForm.get(field);
+    return !!formControl?.touched && !!formControl?.errors?.[error];
+  }
+
+  // Validators customizados
+  modelValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const model = control.value.toLowerCase();
+    const forbiddenWords = ['teste', 'test', 'exemplo'];
+
+    if (forbiddenWords.some(word => model.includes(word))) {
+      return { invalidModel: true };
+    }
+    return null;
+  }
+
+  releaseDateValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const releaseDate = new Date(control.value);
+    const currentDate = new Date();
+    const minDate = new Date('2000-01-01');
+
+    if (releaseDate > currentDate) {
+      return { futureDate: true };
+    }
+    if (releaseDate < minDate) {
+      return { tooOld: true };
+    }
+    return null;
+  }
+
+  priceValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const price = +control.value;
+    if (price > 50000) {
+      return { tooExpensive: true };
+    }
+    return null;
+  }
+
+  stockValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value && control.value !== 0) return null;
+
+    const stock = +control.value;
+    if (stock > 10000) {
+      return { excessiveStock: true };
+    }
+    return null;
   }
 }

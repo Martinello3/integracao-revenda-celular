@@ -41,7 +41,8 @@ export class PhoneService {
         releaseDate: phone.releaseDate,
         price: typeof phone.price === 'string' ? parseFloat(phone.price) : phone.price,
         category: phone.category,
-        brandId: phone.brandId
+        brandId: phone.brandId,
+        stock: phone.stock
       };
       return this.update(phone.id, updateData);
     } else {
@@ -51,7 +52,8 @@ export class PhoneService {
         releaseDate: phone.releaseDate,
         price: typeof phone.price === 'string' ? parseFloat(phone.price) : phone.price,
         category: phone.category,
-        brandId: phone.brandId
+        brandId: phone.brandId,
+        stock: phone.stock
       };
       return this.add(createData);
     }

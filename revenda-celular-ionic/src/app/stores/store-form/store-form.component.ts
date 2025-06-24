@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { StoreService } from '../services/store.service';
@@ -13,13 +13,28 @@ import { StoreService } from '../services/store.service';
 export class StoreFormComponent implements OnInit {
   storeForm: FormGroup = new FormGroup({
     name: new FormControl('', [
-      Validators.required, Validators.minLength(3), Validators.maxLength(100)
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(100),
+      this.storeNameValidator
     ]),
-    address: new FormControl('', [Validators.required]),
-    city: new FormControl('', [Validators.required]),
+    address: new FormControl('', [
+      Validators.required,
+      Validators.minLength(10)
+    ]),
+    city: new FormControl('', [
+      Validators.required,
+      Validators.pattern(/^[a-zA-ZÀ-ÿ\s]+$/)
+    ]),
     state: new FormControl('', [Validators.required]),
-    phone: new FormControl('', [Validators.required]),
-    manager: new FormControl('', [Validators.required]),
+    phone: new FormControl('', [
+      Validators.required,
+      this.phoneValidator
+    ]),
+    manager: new FormControl('', [
+      Validators.required,
+      Validators.pattern(/^[a-zA-ZÀ-ÿ\s]+$/)
+    ]),
     isHeadquarters: new FormControl(false),
     status: new FormControl('active', [Validators.required])
   });
@@ -71,10 +86,6 @@ export class StoreFormComponent implements OnInit {
     }
   }
 
-  hasError(field: string, error: string) {
-    const formControl = this.storeForm.get(field);
-    return formControl?.touched && formControl?.errors?.[error];
-  }
 
   save() {
     const { value } = this.storeForm;
@@ -101,5 +112,33 @@ export class StoreFormComponent implements OnInit {
         console.error(error);
       }
     });
+  }
+
+  hasError(field: string, error: string): boolean {
+    const formControl = this.storeForm.get(field);
+    return !!formControl?.touched && !!formControl?.errors?.[error];
+  }
+
+  // Validators customizados
+  storeNameValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const name = control.value.toLowerCase();
+    const forbiddenWords = ['loja', 'store', 'shop'];
+
+    if (!forbiddenWords.some(word => name.includes(word))) {
+      return { missingStoreIdentifier: true };
+    }
+    return null;
+  }
+
+  phoneValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const phone = control.value.replace(/\D/g, '');
+    if (phone.length !== 10 && phone.length !== 11) {
+      return { invalidPhone: true };
+    }
+    return null;
   }
 }

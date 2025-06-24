@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { SaleService } from '../services/sale.service';
@@ -90,30 +90,59 @@ export class SaleFormComponent implements OnInit {
     const itemForm = this.fb.group({
       productType: ['phone', Validators.required],
       product: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      unitPrice: ['0', Validators.required], 
-      subtotal: ['0'] 
+      quantity: [1, [Validators.required, Validators.min(1), this.stockValidator.bind(this)]],
+      unitPrice: ['0', [Validators.required, Validators.min(0.01)]],
+      subtotal: ['0']
     });
 
-    
+    // Listener para mudança de tipo de produto - reseta todos os campos
+    itemForm.get('productType')?.valueChanges.subscribe((productType: string | null) => {
+      console.log('Tipo de produto alterado para:', productType);
+      if (productType) {
+        this.resetItemFields(itemForm);
+      }
+    });
+
+    // Listener para mudança de produto - atualiza preço e reseta quantidade
     itemForm.get('product')?.valueChanges.subscribe((product: Phone | Accessory | any) => {
+      console.log('Produto alterado para:', product);
+
       if (product && typeof product === 'object' && 'price' in product) {
         const price = product.price ? formatNumberMask(parseFloat(product.price)) : '0';
         itemForm.get('unitPrice')?.setValue(price);
-        
+
+        // Resetar quantidade para 1 quando produto muda
+        itemForm.get('quantity')?.setValue(1);
+
         this.updateItemSubtotal(itemForm);
+      } else {
+        // Se produto foi limpo, resetar campos
+        this.resetItemFields(itemForm, false); // false = não resetar o produto
       }
     });
 
     itemForm.get('quantity')?.valueChanges.subscribe(() => {
       this.updateItemSubtotal(itemForm);
     });
-    
+
     itemForm.get('unitPrice')?.valueChanges.subscribe(() => {
       this.updateItemSubtotal(itemForm);
     });
 
     return itemForm;
+  }
+
+  // Método para resetar campos do item
+  private resetItemFields(itemForm: FormGroup, resetProduct: boolean = true): void {
+    if (resetProduct) {
+      itemForm.get('product')?.setValue('', { emitEvent: false });
+    }
+    itemForm.get('quantity')?.setValue(1, { emitEvent: false });
+    itemForm.get('unitPrice')?.setValue('0', { emitEvent: false });
+    itemForm.get('subtotal')?.setValue('0', { emitEvent: false });
+
+    // Atualizar totais após reset
+    this.updateTotals();
   }
 
   addItem() {
@@ -364,5 +393,82 @@ export class SaleFormComponent implements OnInit {
     const itemFormGroup = this.itemsFormArray.at(index);
     const formControl = itemFormGroup.get(field);
     return !!formControl?.touched && !!formControl?.errors?.[error];
+  }
+
+  // Validators customizados
+  futureDateValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      return { futureDate: true };
+    }
+    return null;
+  }
+
+  stockValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value || !control.parent) return null;
+
+    const quantity = +control.value;
+    const product = control.parent.get('product')?.value;
+
+    if (!product) {
+      return null; // Se não há produto selecionado, deixa outros validators tratarem
+    }
+
+    // Se o produto não tem campo stock definido, considera como sem estoque limitado
+    if (product.stock === undefined || product.stock === null) {
+      return null; // Permite venda se estoque não está definido
+    }
+
+    // Se estoque é 0, não permite venda
+    if (product.stock === 0) {
+      return { noStock: true };
+    }
+
+    // Se quantidade excede estoque disponível
+    if (quantity > product.stock) {
+      return { stockExceeded: true };
+    }
+
+    return null;
+  }
+
+  // Métodos para exibir informações de estoque
+  getItemQuantity(index: number): number {
+    const itemForm = this.itemsFormArray.at(index);
+    return +itemForm.get('quantity')?.value || 0;
+  }
+
+  getProductStock(index: number): number {
+    const itemForm = this.itemsFormArray.at(index);
+    const product = itemForm.get('product')?.value;
+
+    // Se produto não tem estoque definido, mostra "∞" (infinito)
+    if (!product || product.stock === undefined || product.stock === null) {
+      return 999; // Valor alto para indicar "sem limite"
+    }
+
+    return product.stock;
+  }
+
+  getStockColor(index: number): string {
+    const quantity = this.getItemQuantity(index);
+    const stock = this.getProductStock(index);
+
+    // Se estoque é "infinito" (999), sempre verde
+    if (stock === 999) return 'success';
+
+    if (quantity > stock) return 'danger';
+    if (quantity === stock) return 'warning';
+    return 'success';
+  }
+
+  getStockDisplay(index: number): string {
+    const stock = this.getProductStock(index);
+    return stock === 999 ? '∞' : stock.toString();
   }
 }

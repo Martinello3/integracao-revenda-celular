@@ -23,6 +23,9 @@
           @if(hasError('model', 'maxlength')) {
             O campo deve ter no máximo 150 caracteres
           }
+          @if(hasError('model', 'invalidModel')) {
+            Modelo não pode conter palavras como 'teste' ou 'exemplo'
+          }
           </p>
         </ion-item>
         <ion-item>
@@ -40,8 +43,11 @@
           <ion-input formControlName="releaseDate" labelPlacement="floating" label="Lançamento" [maskito]="dateMask"
             [maskitoElement]="maskitoElement" />
           <p>
-          @if(hasError('releaseDate', 'required')) {
-            O campo é obrigatório
+          @if(hasError('releaseDate', 'futureDate')) {
+            Data de lançamento não pode ser no futuro
+          }
+          @if(hasError('releaseDate', 'tooOld')) {
+            Data de lançamento deve ser posterior ao ano 2000
           }
           </p>
         </ion-item>
@@ -53,6 +59,9 @@
           }
           @if(hasError('price', 'min')) {
             O preço deve ser maior ou igual a zero
+          }
+          @if(hasError('price', 'tooExpensive')) {
+            Preço não pode ser superior a R$ 50.000
           }
           </p>
         </ion-item>
@@ -77,6 +86,24 @@
           <p>
           @if(hasError('brandId', 'required')) {
             O campo é obrigatório
+          }
+          </p>
+        </ion-item>
+
+        <ion-item>
+          <ion-input formControlName="stock" labelPlacement="floating" label="Estoque" type="number" min="0"></ion-input>
+          <p>
+          @if(hasError('stock', 'required')) {
+            O campo é obrigatório
+          }
+          @if(hasError('stock', 'min')) {
+            O estoque deve ser maior ou igual a zero
+          }
+          @if(hasError('stock', 'pattern')) {
+            O estoque deve ser um número inteiro
+          }
+          @if(hasError('stock', 'excessiveStock')) {
+            Estoque não pode ser superior a 10.000 unidades
           }
           </p>
         </ion-item>

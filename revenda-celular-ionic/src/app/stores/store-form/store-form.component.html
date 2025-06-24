@@ -23,6 +23,9 @@
           @if(hasError('name', 'maxlength')) {
             O campo deve ter no máximo 100 caracteres
           }
+          @if(hasError('name', 'missingStoreIdentifier')) {
+            O nome deve conter uma palavra identificadora (loja, store, shop)
+          }
           </p>
         </ion-item>
         
@@ -32,6 +35,9 @@
           @if(hasError('address', 'required')) {
             O campo é obrigatório
           }
+          @if(hasError('address', 'minlength')) {
+            Endereço deve ter pelo menos 10 caracteres
+          }
           </p>
         </ion-item>
         
@@ -40,6 +46,9 @@
           <p>
           @if(hasError('city', 'required')) {
             O campo é obrigatório
+          }
+          @if(hasError('city', 'pattern')) {
+            Cidade deve conter apenas letras e espaços
           }
           </p>
         </ion-item>
@@ -63,6 +72,9 @@
           @if(hasError('phone', 'required')) {
             O campo é obrigatório
           }
+          @if(hasError('phone', 'invalidPhone')) {
+            Telefone deve ter 10 ou 11 dígitos
+          }
           </p>
         </ion-item>
         
@@ -71,6 +83,9 @@
           <p>
           @if(hasError('manager', 'required')) {
             O campo é obrigatório
+          }
+          @if(hasError('manager', 'pattern')) {
+            Nome do gerente deve conter apenas letras e espaços
           }
           </p>
         </ion-item>

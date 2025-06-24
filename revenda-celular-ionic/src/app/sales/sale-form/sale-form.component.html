@@ -125,12 +125,21 @@
 
               <ion-item>
                 <ion-input formControlName="quantity" labelPlacement="floating" label="Quantidade" type="number" min="1"></ion-input>
+                <ion-note slot="end" [color]="getStockColor(i)">
+                  {{ getItemQuantity(i) }}/{{ getStockDisplay(i) }}
+                </ion-note>
                 <p>
                   @if(hasItemError(i, 'quantity', 'required')) {
                     A quantidade é obrigatória
                   }
                   @if(hasItemError(i, 'quantity', 'min')) {
                     A quantidade deve ser pelo menos 1
+                  }
+                  @if(hasItemError(i, 'quantity', 'stockExceeded')) {
+                    Quantidade excede o estoque disponível ({{ getProductStock(i) }} unidades)
+                  }
+                  @if(hasItemError(i, 'quantity', 'noStock')) {
+                    Produto sem estoque disponível
                   }
                 </p>
               </ion-item>

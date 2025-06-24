@@ -23,6 +23,9 @@
             @if(hasError('name', 'maxlength')) {
               O campo deve ter no máximo 100 caracteres
             }
+            @if(hasError('name', 'invalidAccessoryName')) {
+              Nome deve conter uma palavra identificadora (case, capa, carregador, fone, película, suporte)
+            }
           </p>
         </ion-item>
         
@@ -38,6 +41,9 @@
             @if(hasError('description', 'maxlength')) {
               O campo deve ter no máximo 500 caracteres
             }
+            @if(hasError('description', 'negativeDescription')) {
+              Descrição não pode conter palavras negativas
+            }
           </p>
         </ion-item>
         
@@ -49,6 +55,9 @@
             }
             @if(hasError('price', 'min')) {
               O preço deve ser maior ou igual a zero
+            }
+            @if(hasError('price', 'tooExpensive')) {
+              Preço não pode ser superior a R$ 5.000
             }
           </p>
         </ion-item>
@@ -89,6 +98,9 @@
             }
             @if(hasError('stock', 'pattern')) {
               O estoque deve ser um número inteiro
+            }
+            @if(hasError('stock', 'excessiveStock')) {
+              Estoque não pode ser superior a 10.000 unidades
             }
           </p>
         </ion-item>

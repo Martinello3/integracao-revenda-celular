@@ -9,7 +9,8 @@ export type Phone = {
   category: string,
   brandId: number,
   brand?: Brand,
-  accessories?: any[]
+  accessories?: any[],
+  stock?: number
 }
 
 export type CreatePhoneDto = {
@@ -18,7 +19,8 @@ export type CreatePhoneDto = {
   releaseDate: Date | string,
   price: number,
   category: string,
-  brandId: number
+  brandId: number,
+  stock?: number
 }
 
 export type UpdatePhoneDto = Partial<CreatePhoneDto>

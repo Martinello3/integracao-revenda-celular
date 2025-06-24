@@ -23,6 +23,9 @@
             @if(hasError('name', 'maxlength')) {
             O campo deve ter no máximo 100 caracteres
             }
+            @if(hasError('name', 'pattern')) {
+            O nome deve conter apenas letras e espaços
+            }
           </p>
         </ion-item>
 
@@ -35,6 +38,9 @@
             @if(hasError('email', 'email')) {
             Email inválido
             }
+            @if(hasError('email', 'invalidDomain')) {
+            Use um email de domínio válido (gmail.com, hotmail.com, outlook.com, yahoo.com)
+            }
           </p>
         </ion-item>
 
@@ -44,6 +50,9 @@
           <p>
             @if(hasError('phone', 'required')) {
             O campo é obrigatório
+            }
+            @if(hasError('phone', 'invalidPhone')) {
+            Telefone deve ter 11 dígitos (com DDD)
             }
           </p>
         </ion-item>
@@ -55,6 +64,12 @@
             @if(hasError('birthDate', 'required')) {
             O campo é obrigatório
             }
+            @if(hasError('birthDate', 'tooYoung')) {
+            Cliente deve ter pelo menos 16 anos
+            }
+            @if(hasError('birthDate', 'tooOld')) {
+            Data de nascimento inválida
+            }
           </p>
         </ion-item>
 
@@ -63,6 +78,9 @@
           <p>
             @if(hasError('address', 'required')) {
             O campo é obrigatório
+            }
+            @if(hasError('address', 'minlength')) {
+            Endereço deve ter pelo menos 10 caracteres
             }
           </p>
         </ion-item>

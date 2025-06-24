@@ -208,10 +208,10 @@ $ npm run migration:run
 $ npm run migration:revert
 
 # Gerar nova migration
-$ npm run migration:generate -- src/migrations/NomeDaMigration
+$ npm run migration:generate -- src/db/migrations/NomeDaMigration
 
 # Criar migration vazia
-$ npm run migration:create -- src/migrations/NomeDaMigration
+$ npm run migration:create -- src/db/migrations/NomeDaMigration
 ```
 
 ### Desenvolvimento:

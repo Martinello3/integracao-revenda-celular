@@ -23,6 +23,9 @@ export class Phone {
   @Column({ name: 'brand_id' })
   brandId: number;
 
+  @Column({ type: 'int', default: 0 })
+  stock: number;
+
   @ManyToOne('Brand', (brand: any) => brand.phones)
   @JoinColumn({ name: 'brand_id', referencedColumnName: 'id' })
   brand: any;

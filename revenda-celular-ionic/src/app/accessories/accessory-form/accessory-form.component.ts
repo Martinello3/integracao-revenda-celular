@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { AccessoryService } from '../services/accessory.service';
@@ -18,12 +18,22 @@ export class AccessoryFormComponent implements OnInit {
 
   accessoryForm: FormGroup = new FormGroup({
     name: new FormControl('', [
-      Validators.required, Validators.minLength(3), Validators.maxLength(100)
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(100),
+      this.accessoryNameValidator
     ]),
     description: new FormControl('', [
-      Validators.required, Validators.minLength(10), Validators.maxLength(500)
+      Validators.required,
+      Validators.minLength(10),
+      Validators.maxLength(500),
+      this.descriptionValidator
     ]),
-    price: new FormControl(0, [Validators.required, Validators.min(0)]),
+    price: new FormControl(0, [
+      Validators.required,
+      Validators.min(0),
+      this.priceValidator
+    ]),
     category: new FormControl('', Validators.required),
     image: new FormControl('', [
       Validators.required,
@@ -31,7 +41,10 @@ export class AccessoryFormComponent implements OnInit {
     ]),
     compatiblePhones: new FormControl([]),
     stock: new FormControl(0, [
-      Validators.required, Validators.min(0), Validators.pattern('^[0-9]*$')
+      Validators.required,
+      Validators.min(0),
+      Validators.pattern('^[0-9]*$'),
+      this.stockValidator
     ])
   });
 
@@ -141,5 +154,50 @@ export class AccessoryFormComponent implements OnInit {
         console.error(error);
       }
     });
+  }
+
+  // Validators customizados
+  accessoryNameValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const name = control.value.toLowerCase();
+    const requiredWords = ['case', 'capa', 'carregador', 'fone', 'película', 'suporte'];
+
+    if (!requiredWords.some(word => name.includes(word))) {
+      return { invalidAccessoryName: true };
+    }
+    return null;
+  }
+
+  descriptionValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const description = control.value.toLowerCase();
+    const forbiddenWords = ['ruim', 'péssimo', 'horrível'];
+
+    if (forbiddenWords.some(word => description.includes(word))) {
+      return { negativeDescription: true };
+    }
+    return null;
+  }
+
+  priceValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const price = +control.value;
+    if (price > 5000) {
+      return { tooExpensive: true };
+    }
+    return null;
+  }
+
+  stockValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value && control.value !== 0) return null;
+
+    const stock = +control.value;
+    if (stock > 10000) {
+      return { excessiveStock: true };
+    }
+    return null;
   }
 }
