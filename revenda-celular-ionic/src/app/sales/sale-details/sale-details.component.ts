@@ -35,7 +35,7 @@ export class SaleDetailsComponent implements OnInit {
   }
 
   loadSale(id: string | number) {
-    this.saleService.getById(id).subscribe({
+    this.saleService.getById(+id).subscribe({
       next: (sale) => {
         this.sale = sale;
       },
@@ -74,11 +74,13 @@ export class SaleDetailsComponent implements OnInit {
     }
   }
   
-  getProductName(product: Phone | Accessory, type: 'phone' | 'accessory'): string {
+  getProductName(product: Phone | Accessory | undefined, type: 'phone' | 'accessory'): string {
+    if (!product) return 'Produto não encontrado';
+
     if (type === 'phone') {
-      return (product as Phone).model;
+      return (product as Phone).model || 'Celular';
     } else {
-      return (product as Accessory).name;
+      return (product as Accessory).name || 'Acessório';
     }
   }
 
@@ -96,8 +98,8 @@ export class SaleDetailsComponent implements OnInit {
         {
           text: 'Confirmar',
           handler: () => {
-            const updatedSale = { ...this.sale, status: 'canceled' as 'canceled' };
-            this.saleService.save(updatedSale).subscribe({
+            if (this.sale?.id) {
+              this.saleService.updateStatus(this.sale.id, 'canceled').subscribe({
               next: () => {
                 this.toastController.create({
                   message: 'Venda cancelada com sucesso!',
@@ -105,7 +107,9 @@ export class SaleDetailsComponent implements OnInit {
                   color: 'success'
                 }).then(toast => toast.present());
                 
-                this.sale.status = 'canceled';
+                if (this.sale) {
+                  this.sale.status = 'canceled';
+                }
               },
               error: (error) => {
                 console.error('Erro ao cancelar venda', error);
@@ -115,7 +119,8 @@ export class SaleDetailsComponent implements OnInit {
                   color: 'danger'
                 }).then(toast => toast.present());
               }
-            });
+              });
+            }
           }
         }
       ]

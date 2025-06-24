@@ -30,22 +30,22 @@
           <ion-item>
             <ion-label>
               <h2>Cliente</h2>
-              <p>{{ sale.customer.name }}</p>
-              <p>{{ sale.customer.email }}</p>
-              <p>{{ sale.customer.phone }}</p>
+              <p>{{ sale.customer?.name || 'N/A' }}</p>
+              <p>{{ sale.customer?.email || 'N/A' }}</p>
+              <p>{{ sale.customer?.phone || 'N/A' }}</p>
             </ion-label>
           </ion-item>
           
           <ion-item>
             <ion-label>
               <h2>Loja</h2>
-              <p>{{ sale.store.name }}</p>
-              <p *ngIf="sale.store.address">{{ sale.store.address }}</p>
-              <p *ngIf="sale.store.city || sale.store.state">
-                {{ sale.store.city || '' }}{{ sale.store.city && sale.store.state ? '/' : '' }}{{ sale.store.state || '' }}
+              <p>{{ sale.store?.name || 'N/A' }}</p>
+              <p *ngIf="sale.store?.address">{{ sale.store?.address }}</p>
+              <p *ngIf="sale.store?.city || sale.store?.state">
+                {{ sale.store?.city || '' }}{{ sale.store?.city && sale.store?.state ? '/' : '' }}{{ sale.store?.state || '' }}
               </p>
-              <p *ngIf="sale.store.phone">Telefone: {{ sale.store.phone }}</p>
-              <p *ngIf="sale.store.manager">Gerente: {{ sale.store.manager }}</p>
+              <p *ngIf="sale.store?.phone">Telefone: {{ sale.store?.phone }}</p>
+              <p *ngIf="sale.store?.manager">Gerente: {{ sale.store?.manager }}</p>
             </ion-label>
           </ion-item>
           
@@ -69,8 +69,8 @@
           @for(item of sale.items; track $index) {
             <ion-item>
               <ion-label>
-                <h2>{{ item.productType === 'phone' ? 'Celular' : 'Acessório' }}: 
-                  {{ getProductName(item.product, item.productType) }}
+                <h2>{{ item.productType === 'phone' ? 'Celular' : 'Acessório' }}:
+                  {{ item.product ? getProductName(item.product, item.productType) : 'Produto #' + item.productId }}
                 </h2>
                 <p>Quantidade: {{ item.quantity }}</p>
                 <p>Preço Unitário: {{ item.unitPrice | currency: 'BRL' }}</p>

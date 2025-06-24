@@ -129,7 +129,7 @@ export class SaleFormComponent implements OnInit {
   }
 
   loadSale(id: string | number) {
-    this.saleService.getById(id).subscribe({
+    this.saleService.getById(+id).subscribe({
       next: (sale) => {
         Promise.all([
           this.customerService.getAll().toPromise(),
@@ -137,16 +137,43 @@ export class SaleFormComponent implements OnInit {
           this.phoneService.getList().toPromise(),
           this.accessoryService.getList().toPromise()
         ]).then(() => {
-         
+          console.log('Listas carregadas:', {
+            phones: this.phonesList.length,
+            accessories: this.accessoriesList.length,
+            customers: this.customersList.length,
+            stores: this.storesList.length
+          });
+
           while (this.itemsFormArray.length) {
             this.itemsFormArray.removeAt(0);
           }
-          
+
+          console.log('Sale items to load:', sale.items);
+
           sale.items.forEach(item => {
             const itemForm = this.createItemForm();
+
+            // Buscar o produto correto nas listas carregadas
+            let product = null;
+            if (item.productType === 'phone') {
+              product = this.phonesList.find(phone => phone.id === item.productId);
+              console.log(`Buscando phone ID ${item.productId}:`, product);
+            } else if (item.productType === 'accessory') {
+              product = this.accessoriesList.find(accessory => accessory.id === item.productId);
+              console.log(`Buscando accessory ID ${item.productId}:`, product);
+            }
+
+            console.log('Item form data:', {
+              productType: item.productType,
+              productId: item.productId,
+              product: product,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice
+            });
+
             itemForm.patchValue({
               productType: item.productType,
-              product: item.product,
+              product: product,
               quantity: item.quantity,
               unitPrice: formatNumberMask(item.unitPrice),
               subtotal: formatNumberMask(item.subtotal)
@@ -154,10 +181,21 @@ export class SaleFormComponent implements OnInit {
             this.itemsFormArray.push(itemForm);
           });
           
+          // Buscar customer e store corretos nas listas carregadas
+          const customer = this.customersList.find(c => c.id === sale.customerId) || sale.customer;
+          const store = this.storesList.find(s => s.id === sale.storeId) || sale.store;
+
+          console.log('Customer and store data:', {
+            customerId: sale.customerId,
+            customer: customer,
+            storeId: sale.storeId,
+            store: store
+          });
+
           this.saleForm.patchValue({
             date: new Date(sale.date).toISOString().split('T')[0],
-            customer: sale.customer,
-            store: sale.store,
+            customer: customer,
+            store: store,
             paymentMethod: sale.paymentMethod,
             status: sale.status,
             seller: sale.seller,
@@ -242,22 +280,49 @@ export class SaleFormComponent implements OnInit {
 
   save() {
     if (this.saleForm.invalid || this.itemsFormArray.length === 0) {
+      console.log('Form invalid or no items:', {
+        invalid: this.saleForm.invalid,
+        errors: this.saleForm.errors,
+        itemsLength: this.itemsFormArray.length,
+        formControls: Object.keys(this.saleForm.controls).map(key => ({
+          key,
+          valid: this.saleForm.get(key)?.valid,
+          errors: this.saleForm.get(key)?.errors,
+          value: this.saleForm.get(key)?.value
+        })),
+        itemsErrors: this.itemsFormArray.controls.map((control, index) => ({
+          index,
+          valid: control.valid,
+          errors: control.errors,
+          value: control.value
+        }))
+      });
+
+      // Marcar todos os campos como touched para mostrar erros
+      this.saleForm.markAllAsTouched();
+      this.itemsFormArray.controls.forEach(control => control.markAllAsTouched());
+
       return;
     }
-    
+
     const formValue = this.saleForm.value;
-    
+    console.log('Form value:', formValue);
+
     const items = formValue.items.map((item: any) => ({
-      product: item.product,
+      productId: item.product?.id || 0,
       productType: item.productType,
       quantity: +item.quantity,
       unitPrice: parseNumberMask(item.unitPrice),
       subtotal: parseNumberMask(item.subtotal)
     }));
-    
+
+    console.log('Mapped items:', items);
+
     const sale: Sale = {
-      ...(this.saleId ? { id: this.saleId } : {}),
+      ...(this.saleId ? { id: +this.saleId } : {}),
       date: formValue.date,
+      customerId: formValue.customer?.id || 0,
+      storeId: formValue.store?.id || 0,
       customer: formValue.customer,
       store: formValue.store,
       paymentMethod: formValue.paymentMethod,
@@ -266,6 +331,8 @@ export class SaleFormComponent implements OnInit {
       items: items,
       totalValue: parseNumberMask(formValue.totalValue)
     };
+
+    console.log('Sale object to save:', sale);
     
     this.saleService.save(sale).subscribe({
       next: () => {

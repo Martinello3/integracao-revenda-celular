@@ -66,8 +66,8 @@
       <ion-text class="sale-info">
         <h2>Venda #{{ sale.id }}</h2>
         <h3><strong>Data:</strong> {{ sale.date | date: 'dd/MM/yyyy' }}</h3>
-        <h4><strong>Cliente:</strong> {{ sale.customer.name }}</h4>
-        <h4><strong>Loja:</strong> {{ sale.store.name }}</h4>
+        <h4><strong>Cliente:</strong> {{ sale.customer?.name || 'N/A' }}</h4>
+        <h4><strong>Loja:</strong> {{ sale.store?.name || 'N/A' }}</h4>
         <h4><strong>Valor Total:</strong> {{ sale.totalValue | currency: 'BRL' }}</h4>
         <h4>
           <ion-badge [color]="getStatusColor(sale.status)">{{ getStatusLabel(sale.status) }}</ion-badge>

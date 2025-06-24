@@ -16,16 +16,16 @@
       <ion-card-content>
         <div class="financial-summary">
           <div class="summary-item">
-            <h2>{{ totalRevenue | currency:'BRL' }}</h2>
+            <h2>{{ dashboardStats.totalRevenue | currency:'BRL' }}</h2>
             <p>Faturamento Total</p>
           </div>
           <div class="summary-item">
-            <h2>{{ monthlyRevenue | currency:'BRL' }}</h2>
+            <h2>{{ dashboardStats.monthlyRevenue | currency:'BRL' }}</h2>
             <p>Faturamento do Mês</p>
           </div>
           <div class="summary-item">
-            <h2>{{ weeklyRevenue | currency:'BRL' }}</h2>
-            <p>Faturamento da Semana</p>
+            <h2>{{ getAverageTicket() | currency:'BRL' }}</h2>
+            <p>Ticket Médio</p>
           </div>
         </div>
       </ion-card-content>
@@ -39,19 +39,19 @@
         <ion-card-content>
           <div class="stats-grid">
             <div class="stats-item">
-              <ion-icon name="calendar-outline" color="secondary"></ion-icon>
-              <h3>{{ totalSalesMonth }}</h3>
-              <p>Vendas no Mês</p>
+              <ion-icon name="bag-check-outline" color="secondary"></ion-icon>
+              <h3>{{ dashboardStats.totalSales }}</h3>
+              <p>Total de Vendas</p>
             </div>
             <div class="stats-item">
-              <ion-icon name="today-outline" color="secondary"></ion-icon>
-              <h3>{{ totalSalesWeek }}</h3>
-              <p>Vendas na Semana</p>
+              <ion-icon name="time-outline" color="warning"></ion-icon>
+              <h3>{{ dashboardStats.pendingSales }}</h3>
+              <p>Vendas Pendentes</p>
             </div>
             <div class="stats-item">
-              <ion-icon name="trending-up-outline" color="secondary"></ion-icon>
-              <h3>{{ averageTicket | currency:'BRL' }}</h3>
-              <p>Ticket Médio</p>
+              <ion-icon name="trending-up-outline" color="success"></ion-icon>
+              <h3>{{ monthlyData.length }}</h3>
+              <p>Meses com Vendas</p>
             </div>
           </div>
         </ion-card-content>
@@ -63,15 +63,15 @@
         </ion-card-header>
         <ion-card-content>
           <ion-list lines="none">
-            @for(product of topProducts; track product.id) {
+            @for(product of topProducts; track product.productId) {
               <ion-item>
-                <ion-icon name="phone-portrait-outline" slot="start" *ngIf="product.type === 'phone'"></ion-icon>
-                <ion-icon name="hardware-chip-outline" slot="start" *ngIf="product.type === 'accessory'"></ion-icon>
+                <ion-icon name="phone-portrait-outline" slot="start" *ngIf="product.productType === 'phone'"></ion-icon>
+                <ion-icon name="hardware-chip-outline" slot="start" *ngIf="product.productType === 'accessory'"></ion-icon>
                 <ion-label>
-                  <h3>{{ product.name }}</h3>
-                  <p>{{ product.quantity }} unidades vendidas</p>
+                  <h3>{{ product.name || (product.productType === 'phone' ? 'Celular' : 'Acessório') + ' #' + product.productId }}</h3>
+                  <p>{{ product.totalQuantity }} unidades vendidas</p>
                 </ion-label>
-                <ion-note slot="end" color="secondary">{{ product.revenue | currency:'BRL' }}</ion-note>
+                <ion-note slot="end" color="secondary">{{ product.totalRevenue | currency:'BRL' }}</ion-note>
               </ion-item>
             }
             @empty {
@@ -99,8 +99,8 @@
               <ion-label>
                 <h2>Venda #{{ sale.id }}</h2>
                 <ion-text color="medium">{{ sale.date | date:'dd/MM/yyyy' }}</ion-text>
-                <p>Cliente: {{ sale.customer.name }}</p>
-                <p>Loja: {{ sale.store.name }}</p>
+                <p>Cliente: {{ sale.customer?.name || 'N/A' }}</p>
+                <p>Loja: {{ sale.store?.name || 'N/A' }}</p>
               </ion-label>
               <div class="sale-info" slot="end">
                 <ion-badge [color]="getStatusColor(sale.status)">{{ getStatusLabel(sale.status) }}</ion-badge>

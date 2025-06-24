@@ -12,14 +12,30 @@ export class SaleController {
     return this.saleService.create(createSaleDto);
   }
 
+  // Dashboard endpoints (must come before dynamic routes)
+  @Get('dashboard/stats')
+  getDashboardStats() {
+    return this.saleService.getDashboardStats();
+  }
+
+  @Get('dashboard/monthly')
+  getSalesByMonth() {
+    return this.saleService.getSalesByMonth();
+  }
+
+  @Get('dashboard/top-products')
+  getTopProducts() {
+    return this.saleService.getTopProducts();
+  }
+
+  @Get('dashboard/recent')
+  getRecentSales(@Query('limit') limit?: string) {
+    return this.saleService.getRecentSales(limit ? +limit : 10);
+  }
+
   @Get()
   findAll(@Query('status') status?: string) {
     return this.saleService.findAll(status);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.saleService.findOne(+id);
   }
 
   @Get('customer/:customerId')
@@ -30,6 +46,11 @@ export class SaleController {
   @Get('store/:storeId')
   findByStore(@Param('storeId') storeId: string) {
     return this.saleService.findByStore(+storeId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.saleService.findOne(+id);
   }
 
   @Patch(':id')

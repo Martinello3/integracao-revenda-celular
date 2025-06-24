@@ -1,9 +1,11 @@
-import { Phone } from "src/app/phones/models/phone.type";
-import { Accessory } from "src/app/accessories/models/accessory.type";
+import { Phone } from "../../phones/models/phone.type";
+import { Accessory } from "../../accessories/models/accessory.type";
 
 export type SaleItem = {
   id?: number;
-  product: Phone | Accessory;
+  saleId?: number;
+  productId: number;
+  product?: Phone | Accessory;
   productType: 'phone' | 'accessory';
   quantity: number;
   unitPrice: number;

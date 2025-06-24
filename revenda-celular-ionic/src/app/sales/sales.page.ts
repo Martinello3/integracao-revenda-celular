@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 import { Sale, SaleStatus, PaymentMethods } from './models/sale.type';
 import { SaleService } from './services/sale.service';
 import { StoreService } from '../stores/services/store.service';
@@ -25,7 +25,8 @@ export class SalesPage implements OnInit {
   constructor(
     private saleService: SaleService,
     private storeService: StoreService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private toastController: ToastController
   ) { }
 
   ngOnInit() {
@@ -60,9 +61,13 @@ export class SalesPage implements OnInit {
   }
 
   applyFilters() {
-    this.saleService.filterSales(this.filters).subscribe({
+    this.saleService.getAll(this.filters.status || undefined).subscribe({
       next: (sales) => {
-        this.salesList = sales;
+        if (this.filters.storeId) {
+          this.salesList = sales.filter(sale => sale.storeId === this.filters.storeId);
+        } else {
+          this.salesList = sales;
+        }
       },
       error: (error) => {
         console.error('Erro ao filtrar vendas', error);
@@ -109,13 +114,64 @@ export class SalesPage implements OnInit {
         {
           text: 'Confirmar',
           handler: () => {
-            const updatedSale = { ...sale, status: 'canceled' as 'canceled' };
-            this.saleService.save(updatedSale).subscribe({
+            if (sale.id) {
+              this.saleService.updateStatus(sale.id, 'canceled').subscribe({
+                next: () => {
+                  this.loadSales();
+                  this.toastController.create({
+                    message: `Venda #${sale.id} cancelada com sucesso!`,
+                    duration: 3000,
+                    color: 'secondary',
+                    keyboardClose: true,
+                  }).then(toast => toast.present());
+                },
+                error: (error) => {
+                  let errorMessage = 'Erro ao cancelar venda';
+                  if (error.error?.message) {
+                    errorMessage = error.error.message;
+                  }
+                  window.alert(errorMessage);
+                  console.error('Erro ao cancelar venda', error);
+                }
+              });
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async deleteSale(sale: Sale) {
+    const alert = await this.alertController.create({
+      header: 'Confirmar Exclusão',
+      message: `Tem certeza que deseja excluir a venda #${sale.id}?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Excluir',
+          handler: () => {
+            this.saleService.remove(sale).subscribe({
               next: () => {
-                this.loadSales();
+                this.salesList = this.salesList.filter(s => s.id !== sale.id);
+                this.toastController.create({
+                  message: `Venda #${sale.id} excluída com sucesso!`,
+                  duration: 3000,
+                  color: 'secondary',
+                  keyboardClose: true,
+                }).then(toast => toast.present());
               },
               error: (error) => {
-                console.error('Erro ao cancelar venda', error);
+                let errorMessage = 'Erro ao excluir venda';
+                if (error.error?.message) {
+                  errorMessage = error.error.message;
+                }
+                window.alert(errorMessage);
+                console.error('Erro ao excluir venda', error);
               }
             });
           }

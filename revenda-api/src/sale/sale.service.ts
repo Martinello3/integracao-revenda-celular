@@ -89,4 +89,79 @@ export class SaleService {
   remove(id: number) {
     return this.saleRepository.delete(id);
   }
+
+  // Dashboard methods
+  async getDashboardStats() {
+    const totalSales = await this.saleRepository.count();
+    const totalRevenue = await this.saleRepository
+      .createQueryBuilder('sale')
+      .select('SUM(sale.totalValue)', 'total')
+      .where('sale.status = :status', { status: 'completed' })
+      .getRawOne();
+
+    const monthlyRevenue = await this.saleRepository
+      .createQueryBuilder('sale')
+      .select('SUM(sale.totalValue)', 'total')
+      .where('sale.status = :status', { status: 'completed' })
+      .andWhere('EXTRACT(MONTH FROM sale.date) = EXTRACT(MONTH FROM CURRENT_DATE)')
+      .andWhere('EXTRACT(YEAR FROM sale.date) = EXTRACT(YEAR FROM CURRENT_DATE)')
+      .getRawOne();
+
+    const pendingSales = await this.saleRepository.count({
+      where: { status: 'pending' }
+    });
+
+    return {
+      totalSales,
+      totalRevenue: parseFloat(totalRevenue?.total || '0'),
+      monthlyRevenue: parseFloat(monthlyRevenue?.total || '0'),
+      pendingSales
+    };
+  }
+
+  async getSalesByMonth() {
+    return this.saleRepository
+      .createQueryBuilder('sale')
+      .select('EXTRACT(MONTH FROM sale.date)', 'month')
+      .addSelect('EXTRACT(YEAR FROM sale.date)', 'year')
+      .addSelect('COUNT(*)', 'count')
+      .addSelect('SUM(sale.totalValue)', 'revenue')
+      .where('sale.status = :status', { status: 'completed' })
+      .groupBy('EXTRACT(YEAR FROM sale.date), EXTRACT(MONTH FROM sale.date)')
+      .orderBy('year', 'DESC')
+      .addOrderBy('month', 'DESC')
+      .limit(12)
+      .getRawMany();
+  }
+
+  async getTopProducts() {
+    try {
+      const result = await this.saleItemRepository
+        .createQueryBuilder('item')
+        .select('item.productId', 'productId')
+        .addSelect('item.productType', 'productType')
+        .addSelect('SUM(item.quantity)', 'totalQuantity')
+        .addSelect('SUM(item.subtotal)', 'totalRevenue')
+        .innerJoin('item.sale', 'sale')
+        .where('sale.status = :status', { status: 'completed' })
+        .groupBy('item.productId')
+        .addGroupBy('item.productType')
+        .orderBy('SUM(item.quantity)', 'DESC')
+        .limit(10)
+        .getRawMany();
+
+      return result;
+    } catch (error) {
+      console.error('Error in getTopProducts:', error);
+      return [];
+    }
+  }
+
+  async getRecentSales(limit: number = 10) {
+    return this.saleRepository.find({
+      relations: ['customer', 'store'],
+      order: { date: 'DESC' },
+      take: limit
+    });
+  }
 }

@@ -1,12 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { SaleService } from '../sales/services/sale.service';
-import { Sale, SaleStatus } from '../sales/models/sale.type';
+import { Sale, DashboardStats } from '../sales/models/sale.type';
+import { PhoneService } from '../phones/services/phone.service';
+import { AccessoryService } from '../accessories/services/accessory.service';
 
 interface TopProduct {
-  id: number | string;
-  name: string;
-  type: 'phone' | 'accessory';
-  quantity: number;
+  productId: number;
+  productType: 'phone' | 'accessory';
+  name?: string;
+  totalQuantity: number;
+  totalRevenue: number;
+}
+
+interface MonthlyData {
+  month: number;
+  year: number;
+  count: number;
   revenue: number;
 }
 
@@ -17,19 +26,22 @@ interface TopProduct {
   standalone: false,
 })
 export class HomePage implements OnInit {
-  totalRevenue: number = 0;
-  monthlyRevenue: number = 0;
-  weeklyRevenue: number = 0;
-  
-  totalSalesMonth: number = 0;
-  totalSalesWeek: number = 0;
-  averageTicket: number = 0;
+  dashboardStats: DashboardStats = {
+    totalSales: 0,
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    pendingSales: 0
+  };
 
   topProducts: TopProduct[] = [];
-  
+  monthlyData: MonthlyData[] = [];
   recentSales: Sale[] = [];
-  
-  constructor(private saleService: SaleService) {}
+
+  constructor(
+    private saleService: SaleService,
+    private phoneService: PhoneService,
+    private accessoryService: AccessoryService
+  ) {}
   
   ngOnInit() {
     this.loadDashboardData();
@@ -40,97 +52,87 @@ export class HomePage implements OnInit {
   }
   
   loadDashboardData() {
-    this.saleService.getAll().subscribe({
-      next: (sales) => {
-        const completedSales = sales.filter(sale => sale.status === 'completed');
-        
-        this.calculateFinancialSummary(completedSales);
-        
-        this.calculateSalesStats(completedSales);
-        
-        this.calculateTopProducts(completedSales);
-        
-        this.recentSales = [...sales]
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-          .slice(0, 5);
+    // Carregar estatísticas do dashboard
+    this.saleService.getDashboardStats().subscribe({
+      next: (stats) => {
+        this.dashboardStats = stats;
       },
       error: (error) => {
-        console.error('Erro ao carregar dados do dashboard', error);
+        console.error('Erro ao carregar estatísticas', error);
+      }
+    });
+
+    // Carregar dados mensais
+    this.saleService.getSalesByMonth().subscribe({
+      next: (data) => {
+        this.monthlyData = data;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar dados mensais', error);
+      }
+    });
+
+    // Carregar top produtos
+    this.saleService.getTopProducts().subscribe({
+      next: (products) => {
+        this.topProducts = products;
+        this.loadProductNames();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar top produtos', error);
+      }
+    });
+
+    // Carregar vendas recentes
+    this.saleService.getRecentSales(5).subscribe({
+      next: (sales) => {
+        this.recentSales = sales;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar vendas recentes', error);
       }
     });
   }
   
-  calculateFinancialSummary(sales: Sale[]) {
-    this.totalRevenue = sales.reduce((sum, sale) => sum + sale.totalValue, 0);
-    
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
-    
-    this.monthlyRevenue = sales
-      .filter(sale => new Date(sale.date) >= startOfMonth)
-      .reduce((sum, sale) => sum + sale.totalValue, 0);
-    
-    this.weeklyRevenue = sales
-      .filter(sale => new Date(sale.date) >= startOfWeek)
-      .reduce((sum, sale) => sum + sale.totalValue, 0);
-  }
-  
-  calculateSalesStats(sales: Sale[]) {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
-    
-    const monthSales = sales.filter(sale => new Date(sale.date) >= startOfMonth);
-    this.totalSalesMonth = monthSales.length;
-    
-    const weekSales = sales.filter(sale => new Date(sale.date) >= startOfWeek);
-    this.totalSalesWeek = weekSales.length;
-    
-    // Ticket médio
-    this.averageTicket = sales.length > 0 ? this.totalRevenue / sales.length : 0;
-  }
-  
-  calculateTopProducts(sales: Sale[]) {
-    const productMap = new Map<string, TopProduct>();
-
-    sales.forEach(sale => {
-      sale.items.forEach(item => {
-        const productId = item.product.id?.toString() || '';
-        const productName = this.getProductName(item.product, item.productType);
-        const productType = item.productType as 'phone' | 'accessory';
-        const quantity = item.quantity;
-        const revenue = item.subtotal;
-        
-        if (productMap.has(productId)) {
-          const existingProduct = productMap.get(productId)!;
-          existingProduct.quantity += quantity;
-          existingProduct.revenue += revenue;
-        } else {
-          productMap.set(productId, {
-            id: productId,
-            name: productName,
-            type: productType,
-            quantity: quantity,
-            revenue: revenue
-          });
-        }
-      });
+  loadProductNames() {
+    // Carregar nomes dos produtos para os top produtos
+    this.topProducts.forEach(product => {
+      if (product.productType === 'phone') {
+        this.phoneService.getById(product.productId).subscribe({
+          next: (phone) => {
+            product.name = phone.model;
+          },
+          error: (error) => {
+            console.error('Erro ao carregar nome do celular', error);
+            product.name = `Celular #${product.productId}`;
+          }
+        });
+      } else if (product.productType === 'accessory') {
+        this.accessoryService.getById(product.productId).subscribe({
+          next: (accessory) => {
+            product.name = accessory.name;
+          },
+          error: (error) => {
+            console.error('Erro ao carregar nome do acessório', error);
+            product.name = `Acessório #${product.productId}`;
+          }
+        });
+      }
     });
-    
-    this.topProducts = Array.from(productMap.values())
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5);
+  }
+
+  getAverageTicket(): number {
+    return this.dashboardStats.totalSales > 0
+      ? this.dashboardStats.totalRevenue / this.dashboardStats.totalSales
+      : 0;
   }
   
-  getProductName(product: any, type: string): string {
-    if (type === 'phone') {
-      return product.model || 'Celular';
-    } else {
-      return product.name || 'Acessório';
-    }
+  getMonthName(month: number): string {
+    const months = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+    return months[month - 1] || '';
   }
   
   getStatusLabel(status: string): string {

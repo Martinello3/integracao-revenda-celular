@@ -10,6 +10,7 @@ export class CreateSaleDto {
   customerId: number;
   storeId: number;
   paymentMethod: 'pix' | 'debit' | 'credit';
+  status?: 'pending' | 'completed' | 'canceled';
   seller: string;
   items: CreateSaleItemDto[];
 }
