@@ -9,6 +9,7 @@ import { StoresPageRoutingModule } from './stores-routing.module';
 import { StoresPage } from './stores.page';
 import { StoreFormComponent } from './store-form/store-form.component';
 import { HttpClientModule } from '@angular/common/http';
+import { MaskitoDirective } from '@maskito/angular';
 
 @NgModule({
   imports: [
@@ -18,6 +19,7 @@ import { HttpClientModule } from '@angular/common/http';
     StoresPageRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
+    MaskitoDirective,
   ],
   declarations: [
     StoresPage,

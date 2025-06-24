@@ -31,8 +31,12 @@ export class BrandsPage implements OnInit, ViewDidEnter {
         this.brandsList = response;
       },
       error: (error) => {
-        alert('Erro ao carregar lista de marcas');
-        console.error(error);
+        console.error('Erro ao carregar lista de marcas', error);
+        this.toastController.create({
+          message: 'Erro ao carregar lista de marcas',
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
@@ -61,8 +65,12 @@ export class BrandsPage implements OnInit, ViewDidEnter {
                 if (error.error?.message) {
                   errorMessage = error.error.message;
                 }
-                alert(errorMessage);
-                console.error(error);
+                console.error('Erro ao excluir marca', error);
+                this.toastController.create({
+                  message: errorMessage,
+                  duration: 3000,
+                  color: 'danger'
+                }).then(toast => toast.present());
               }
             });
           }

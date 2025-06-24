@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Brand } from './brand.entity';
@@ -39,11 +39,38 @@ export class BrandService {
     });
   }
 
-  update(id: number, updateBrandDto: UpdateBrandDto) {
+  async update(id: number, updateBrandDto: UpdateBrandDto) {
+    // REGRA DE NEGÓCIO: Não permitir marcas duplicadas (exceto a própria marca sendo editada)
+    if (updateBrandDto.name) {
+      const existingBrand = await this.brandRepository.findOne({
+        where: { name: updateBrandDto.name }
+      });
+
+      if (existingBrand && existingBrand.id !== id) {
+        throw new ConflictException(`Marca '${updateBrandDto.name}' já existe no sistema`);
+      }
+    }
+
     return this.brandRepository.update(id, updateBrandDto);
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    // REGRA DE NEGÓCIO: Não permitir deletar marca que possui celulares associados
+    const brand = await this.brandRepository.findOne({
+      where: { id },
+      relations: ['phones'],
+    });
+
+    if (!brand) {
+      throw new BadRequestException(`Marca com ID ${id} não encontrada`);
+    }
+
+    if (brand.phones && brand.phones.length > 0) {
+      throw new BadRequestException(
+        `Não é possível deletar a marca '${brand.name}' pois existem ${brand.phones.length} celular(es) associado(s) a ela`
+      );
+    }
+
     return this.brandRepository.delete(id);
   }
 }

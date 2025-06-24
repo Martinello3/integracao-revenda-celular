@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { dateMask, maskitoElement, parseDateMask, formatDateMask } from '../../core/constants/mask.constants';
 import { ApplicationValidators } from '../../core/validators/url.validator';
 import { PhoneService } from '../services/phone.service';
@@ -37,17 +37,17 @@ export class PhoneFormComponent implements OnInit {
       Validators.required,
       Validators.minLength(3),
       Validators.maxLength(150),
-      this.modelValidator
+      ApplicationValidators.phoneModelValidator
     ]),
     image: new FormControl('', [
       Validators.required,
       ApplicationValidators.urlValidator
     ]),
-    releaseDate: new FormControl('', [this.releaseDateValidator]),
+    releaseDate: new FormControl('', [ApplicationValidators.releaseDateValidator]),
     price: new FormControl(0, [
       Validators.required,
       Validators.min(0),
-      this.priceValidator
+      ApplicationValidators.phonePriceValidator
     ]),
     category: new FormControl('', Validators.required),
     brandId: new FormControl(null, Validators.required),
@@ -55,7 +55,7 @@ export class PhoneFormComponent implements OnInit {
       Validators.required,
       Validators.min(0),
       Validators.pattern('^[0-9]*$'),
-      this.stockValidator
+      ApplicationValidators.phoneStockValidator
     ])
   });
   phoneId!: number;
@@ -106,8 +106,12 @@ export class PhoneFormComponent implements OnInit {
           }
         },
         error: (error) => {
-          alert('Erro ao carregar o celular com id ' + phoneId)
-          console.error(error);
+          console.error('Erro ao carregar celular', error);
+          this.toastController.create({
+            message: 'Erro ao carregar o celular com id ' + phoneId,
+            duration: 3000,
+            color: 'danger'
+          }).then(toast => toast.present());
         }
       });
     }
@@ -119,8 +123,12 @@ export class PhoneFormComponent implements OnInit {
         this.brands = data;
       },
       error: (error) => {
-        alert('Erro ao carregar marcas.');
-        console.error(error)
+        console.error('Erro ao carregar marcas', error);
+        this.toastController.create({
+          message: 'Erro ao carregar marcas',
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
@@ -165,8 +173,12 @@ export class PhoneFormComponent implements OnInit {
         if (error.error?.message) {
           errorMessage = error.error.message;
         }
-        alert(errorMessage);
-        console.error(error);
+        console.error('Erro ao salvar o celular', error);
+        this.toastController.create({
+          message: errorMessage,
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
@@ -176,52 +188,4 @@ export class PhoneFormComponent implements OnInit {
     return !!formControl?.touched && !!formControl?.errors?.[error];
   }
 
-  // Validators customizados
-  modelValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const model = control.value.toLowerCase();
-    const forbiddenWords = ['teste', 'test', 'exemplo'];
-
-    if (forbiddenWords.some(word => model.includes(word))) {
-      return { invalidModel: true };
-    }
-    return null;
-  }
-
-  releaseDateValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const releaseDate = new Date(control.value);
-    const currentDate = new Date();
-    const minDate = new Date('2000-01-01');
-
-    if (releaseDate > currentDate) {
-      return { futureDate: true };
-    }
-    if (releaseDate < minDate) {
-      return { tooOld: true };
-    }
-    return null;
-  }
-
-  priceValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const price = +control.value;
-    if (price > 50000) {
-      return { tooExpensive: true };
-    }
-    return null;
-  }
-
-  stockValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value && control.value !== 0) return null;
-
-    const stock = +control.value;
-    if (stock > 10000) {
-      return { excessiveStock: true };
-    }
-    return null;
-  }
 }

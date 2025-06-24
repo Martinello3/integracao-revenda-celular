@@ -46,6 +46,17 @@ export class CustomerService {
   }
 
   async update(id: number, updateCustomerDto: UpdateCustomerDto) {
+    // REGRA DE NEGÓCIO: Email único (exceto o próprio cliente sendo editado)
+    if (updateCustomerDto.email) {
+      const existingCustomer = await this.customerRepository.findOne({
+        where: { email: updateCustomerDto.email }
+      });
+
+      if (existingCustomer && existingCustomer.id !== id) {
+        throw new ConflictException(`Email '${updateCustomerDto.email}' já está em uso por outro cliente`);
+      }
+    }
+
     // REGRA DE NEGÓCIO 8: Não permitir downgrade de VIP para regular
     if (updateCustomerDto.customerType) {
       const existingCustomer = await this.customerRepository.findOne({ where: { id } });
@@ -55,7 +66,7 @@ export class CustomerService {
       }
 
       if (existingCustomer.customerType === 'vip' && updateCustomerDto.customerType === 'regular') {
-        throw new BadRequestException(
+        throw new BadRequestException( 
           'Não é permitido fazer downgrade de cliente VIP para regular. Entre em contato com o suporte.'
         );
       }

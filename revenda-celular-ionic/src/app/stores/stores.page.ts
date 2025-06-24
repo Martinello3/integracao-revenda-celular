@@ -40,8 +40,12 @@ export class StoresPage implements OnInit, ViewWillEnter,
         this.storesList = response;
       },
       error: (error) => {
-        alert('Erro ao carregar lista de lojas');
-        console.error(error);
+        console.error('Erro ao carregar lista de lojas', error);
+        this.toastController.create({
+          message: 'Erro ao carregar lista de lojas',
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
@@ -90,8 +94,12 @@ export class StoresPage implements OnInit, ViewWillEnter,
                 if (error.error?.message) {
                   errorMessage = error.error.message;
                 }
-                alert(errorMessage);
-                console.error(error);
+                console.error('Erro ao excluir loja', error);
+                this.toastController.create({
+                  message: errorMessage,
+                  duration: 3000,
+                  color: 'danger'
+                }).then(toast => toast.present());
               }
             });
           }

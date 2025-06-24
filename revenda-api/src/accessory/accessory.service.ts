@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, In } from 'typeorm';
 import { Accessory } from './accessory.entity';
@@ -16,6 +16,15 @@ export class AccessoryService {
   ) {}
 
   async create(createAccessoryDto: CreateAccessoryDto) {
+    // REGRA DE NEGÓCIO: Não permitir acessórios com nome duplicado
+    const existingAccessory = await this.accessoryRepository.findOne({
+      where: { name: createAccessoryDto.name }
+    });
+
+    if (existingAccessory) {
+      throw new ConflictException(`Acessório '${createAccessoryDto.name}' já existe no sistema`);
+    }
+
     // REGRA DE NEGÓCIO 7: Não permitir criar acessórios com preço negativo
     if (createAccessoryDto.price < 0) {
       throw new BadRequestException(
@@ -81,6 +90,17 @@ export class AccessoryService {
   async update(id: number, updateAccessoryDto: UpdateAccessoryDto) {
     const { compatiblePhoneIds, ...accessoryData } = updateAccessoryDto;
 
+    // REGRA DE NEGÓCIO: Não permitir nomes duplicados (exceto o próprio acessório sendo editado)
+    if (accessoryData.name) {
+      const existingAccessory = await this.accessoryRepository.findOne({
+        where: { name: accessoryData.name }
+      });
+
+      if (existingAccessory && existingAccessory.id !== id) {
+        throw new ConflictException(`Acessório '${accessoryData.name}' já existe no sistema`);
+      }
+    }
+
     // Atualizar dados básicos do acessório
     await this.accessoryRepository.update(id, accessoryData);
 
@@ -131,7 +151,27 @@ export class AccessoryService {
       .execute();
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    // REGRA DE NEGÓCIO: Não permitir deletar acessório que está em vendas
+    const accessory = await this.accessoryRepository.findOne({ where: { id } });
+
+    if (!accessory) {
+      throw new NotFoundException(`Acessório com ID ${id} não encontrado`);
+    }
+
+    // Verificar se o acessório está em alguma venda através de sale_items
+    const accessoryInSales = await this.accessoryRepository
+      .createQueryBuilder('accessory')
+      .innerJoin('sale_items', 'si', 'si.product_id = accessory.id AND si.productType = :type', { type: 'accessory' })
+      .where('accessory.id = :id', { id })
+      .getOne();
+
+    if (accessoryInSales) {
+      throw new BadRequestException(
+        `Não é possível deletar acessório que está associado a vendas. Nome: ${accessory.name}`
+      );
+    }
+
     return this.accessoryRepository.delete(id);
   }
 }

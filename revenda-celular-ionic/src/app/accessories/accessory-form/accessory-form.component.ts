@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { AccessoryService } from '../services/accessory.service';
@@ -21,18 +21,18 @@ export class AccessoryFormComponent implements OnInit {
       Validators.required,
       Validators.minLength(3),
       Validators.maxLength(100),
-      this.accessoryNameValidator
+      ApplicationValidators.accessoryNameValidator
     ]),
     description: new FormControl('', [
       Validators.required,
       Validators.minLength(10),
       Validators.maxLength(500),
-      this.descriptionValidator
+      ApplicationValidators.descriptionValidator
     ]),
     price: new FormControl(0, [
       Validators.required,
       Validators.min(0),
-      this.priceValidator
+      ApplicationValidators.accessoryPriceValidator
     ]),
     category: new FormControl('', Validators.required),
     image: new FormControl('', [
@@ -44,7 +44,7 @@ export class AccessoryFormComponent implements OnInit {
       Validators.required,
       Validators.min(0),
       Validators.pattern('^[0-9]*$'),
-      this.stockValidator
+      ApplicationValidators.accessoryStockValidator
     ])
   });
 
@@ -95,8 +95,12 @@ export class AccessoryFormComponent implements OnInit {
           }
         },
         error: (error) => {
-          alert('Erro ao carregar o acessório com id ' + accessoryId);
-          console.error(error);
+          console.error('Erro ao carregar acessório', error);
+          this.toastController.create({
+            message: 'Erro ao carregar o acessório com id ' + accessoryId,
+            duration: 3000,
+            color: 'danger'
+          }).then(toast => toast.present());
         }
       });
     }
@@ -108,8 +112,12 @@ export class AccessoryFormComponent implements OnInit {
         this.phones = phones;
       },
       error: (error) => {
-        alert('Erro ao carregar lista de celulares');
-        console.error(error);
+        console.error('Erro ao carregar lista de celulares', error);
+        this.toastController.create({
+          message: 'Erro ao carregar lista de celulares',
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
@@ -150,54 +158,14 @@ export class AccessoryFormComponent implements OnInit {
         if (error.error?.message) {
           errorMessage = error.error.message;
         }
-        alert(errorMessage);
-        console.error(error);
+        console.error('Erro ao salvar o acessório', error);
+        this.toastController.create({
+          message: errorMessage,
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
 
-  // Validators customizados
-  accessoryNameValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const name = control.value.toLowerCase();
-    const requiredWords = ['case', 'capa', 'carregador', 'fone', 'película', 'suporte'];
-
-    if (!requiredWords.some(word => name.includes(word))) {
-      return { invalidAccessoryName: true };
-    }
-    return null;
-  }
-
-  descriptionValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const description = control.value.toLowerCase();
-    const forbiddenWords = ['ruim', 'péssimo', 'horrível'];
-
-    if (forbiddenWords.some(word => description.includes(word))) {
-      return { negativeDescription: true };
-    }
-    return null;
-  }
-
-  priceValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const price = +control.value;
-    if (price > 5000) {
-      return { tooExpensive: true };
-    }
-    return null;
-  }
-
-  stockValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value && control.value !== 0) return null;
-
-    const stock = +control.value;
-    if (stock > 10000) {
-      return { excessiveStock: true };
-    }
-    return null;
-  }
 }

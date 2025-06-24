@@ -23,7 +23,7 @@
             @if(hasError('name', 'maxlength')) {
             O campo deve ter no máximo 100 caracteres
             }
-            @if(hasError('name', 'pattern')) {
+            @if(hasError('name', 'invalidName')) {
             O nome deve conter apenas letras e espaços
             }
           </p>
@@ -79,7 +79,7 @@
             @if(hasError('address', 'required')) {
             O campo é obrigatório
             }
-            @if(hasError('address', 'minlength')) {
+            @if(hasError('address', 'addressTooShort')) {
             Endereço deve ter pelo menos 10 caracteres
             }
           </p>

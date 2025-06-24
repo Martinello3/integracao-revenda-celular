@@ -23,7 +23,7 @@
           @if(hasError('name', 'maxlength')) {
             O campo deve ter no máximo 100 caracteres
           }
-          @if(hasError('name', 'missingStoreIdentifier')) {
+          @if(hasError('name', 'invalidStoreName')) {
             O nome deve conter uma palavra identificadora (loja, store, shop)
           }
           </p>
@@ -35,7 +35,7 @@
           @if(hasError('address', 'required')) {
             O campo é obrigatório
           }
-          @if(hasError('address', 'minlength')) {
+          @if(hasError('address', 'addressTooShort')) {
             Endereço deve ter pelo menos 10 caracteres
           }
           </p>
@@ -47,7 +47,7 @@
           @if(hasError('city', 'required')) {
             O campo é obrigatório
           }
-          @if(hasError('city', 'pattern')) {
+          @if(hasError('city', 'invalidCity')) {
             Cidade deve conter apenas letras e espaços
           }
           </p>
@@ -67,12 +67,13 @@
         </ion-item>
         
         <ion-item>
-          <ion-input formControlName="phone" labelPlacement="floating" label="Telefone" type="tel"></ion-input>
+          <ion-input formControlName="phone" labelPlacement="floating" label="Telefone" type="tel"
+            [maskito]="phoneMask" [maskitoElement]="maskitoElement"></ion-input>
           <p>
           @if(hasError('phone', 'required')) {
             O campo é obrigatório
           }
-          @if(hasError('phone', 'invalidPhone')) {
+          @if(hasError('phone', 'invalidStorePhone')) {
             Telefone deve ter 10 ou 11 dígitos
           }
           </p>
@@ -84,7 +85,7 @@
           @if(hasError('manager', 'required')) {
             O campo é obrigatório
           }
-          @if(hasError('manager', 'pattern')) {
+          @if(hasError('manager', 'invalidManager')) {
             Nome do gerente deve conter apenas letras e espaços
           }
           </p>

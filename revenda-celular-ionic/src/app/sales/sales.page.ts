@@ -130,8 +130,12 @@ export class SalesPage implements OnInit {
                   if (error.error?.message) {
                     errorMessage = error.error.message;
                   }
-                  window.alert(errorMessage);
                   console.error('Erro ao cancelar venda', error);
+                  this.toastController.create({
+                    message: errorMessage,
+                    duration: 3000,
+                    color: 'danger'
+                  }).then(toast => toast.present());
                 }
               });
             }
@@ -170,8 +174,12 @@ export class SalesPage implements OnInit {
                 if (error.error?.message) {
                   errorMessage = error.error.message;
                 }
-                window.alert(errorMessage);
                 console.error('Erro ao excluir venda', error);
+                this.toastController.create({
+                  message: errorMessage,
+                  duration: 3000,
+                  color: 'danger'
+                }).then(toast => toast.present());
               }
             });
           }

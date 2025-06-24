@@ -83,8 +83,12 @@ export class CustomersPage implements OnInit {
                 if (error.error?.message) {
                   errorMessage = error.error.message;
                 }
-                window.alert(errorMessage);
-                console.error(error);
+                console.error('Erro ao excluir cliente', error);
+                this.toastController.create({
+                  message: errorMessage,
+                  duration: 3000,
+                  color: 'danger'
+                }).then(toast => toast.present());
               }
             });
           }

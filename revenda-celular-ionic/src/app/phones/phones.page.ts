@@ -38,8 +38,12 @@ export class PhonesPage implements OnInit, ViewWillEnter,
         this.phonesList = response;
       },
       error: (error) => {
-        alert('Erro ao carregar lista de celulares');
-        console.error(error);
+        console.error('Erro ao carregar lista de celulares', error);
+        this.toastController.create({
+          message: 'Erro ao carregar lista de celulares',
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
@@ -69,8 +73,12 @@ export class PhonesPage implements OnInit, ViewWillEnter,
                 if (error.error?.message) {
                   errorMessage = error.error.message;
                 }
-                alert(errorMessage);
-                console.error(error);
+                console.error('Erro ao excluir celular', error);
+                this.toastController.create({
+                  message: errorMessage,
+                  duration: 3000,
+                  color: 'danger'
+                }).then(toast => toast.present());
               }
             });
           }

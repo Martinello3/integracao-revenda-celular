@@ -13,6 +13,7 @@ import { Phone } from 'src/app/phones/models/phone.type';
 import { Accessory } from 'src/app/accessories/models/accessory.type';
 import { PaymentMethods, SaleStatus, Sale } from '../models/sale.type';
 import { priceMask, maskitoElement, parseNumberMask, formatNumberMask } from 'src/app/core/constants/mask.constants';
+import { ApplicationValidators } from 'src/app/core/validators/url.validator';
 
 @Component({
   selector: 'app-sale-form',
@@ -90,7 +91,7 @@ export class SaleFormComponent implements OnInit {
     const itemForm = this.fb.group({
       productType: ['phone', Validators.required],
       product: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1), this.stockValidator.bind(this)]],
+      quantity: [1, [Validators.required, Validators.min(1), ApplicationValidators.stockValidator]],
       unitPrice: ['0', [Validators.required, Validators.min(0.01)]],
       subtotal: ['0']
     });
@@ -374,9 +375,13 @@ export class SaleFormComponent implements OnInit {
         this.router.navigate(['/sales']);
       },
       error: (error) => {
+        let errorMessage = 'Erro ao salvar a venda!';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
         console.error('Erro ao salvar venda', error);
         this.toastController.create({
-          message: 'Erro ao salvar venda',
+          message: errorMessage,
           duration: 3000,
           color: 'danger'
         }).then(toast => toast.present());
@@ -406,34 +411,6 @@ export class SaleFormComponent implements OnInit {
     if (selectedDate > today) {
       return { futureDate: true };
     }
-    return null;
-  }
-
-  stockValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value || !control.parent) return null;
-
-    const quantity = +control.value;
-    const product = control.parent.get('product')?.value;
-
-    if (!product) {
-      return null; // Se não há produto selecionado, deixa outros validators tratarem
-    }
-
-    // Se o produto não tem campo stock definido, considera como sem estoque limitado
-    if (product.stock === undefined || product.stock === null) {
-      return null; // Permite venda se estoque não está definido
-    }
-
-    // Se estoque é 0, não permite venda
-    if (product.stock === 0) {
-      return { noStock: true };
-    }
-
-    // Se quantidade excede estoque disponível
-    if (quantity > product.stock) {
-      return { stockExceeded: true };
-    }
-
     return null;
   }
 

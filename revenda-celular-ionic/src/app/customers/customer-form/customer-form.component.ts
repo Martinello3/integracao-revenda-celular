@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { CustomerService } from '../services/customer.service';
 import { dateMask, phoneMask, maskitoElement, parseDateMask, formatDateMask } from '../../core/constants/mask.constants';
+import { ApplicationValidators } from 'src/app/core/validators/url.validator';
 
 @Component({
   selector: 'app-customer-form',
@@ -21,24 +22,24 @@ export class CustomerFormComponent implements OnInit {
       Validators.required,
       Validators.minLength(3),
       Validators.maxLength(100),
-      Validators.pattern(/^[a-zA-ZÀ-ÿ\s]+$/)
+      ApplicationValidators.nameValidator
     ]),
     email: new FormControl('', [
       Validators.required,
       Validators.email,
-      this.emailDomainValidator
+      ApplicationValidators.emailDomainValidator
     ]),
     phone: new FormControl('', [
       Validators.required,
-      this.phoneValidator
+      ApplicationValidators.phoneValidator
     ]),
     birthDate: new FormControl('', [
       Validators.required,
-      this.ageValidator
+      ApplicationValidators.ageValidator
     ]),
     address: new FormControl('', [
       Validators.required,
-      Validators.minLength(10)
+      ApplicationValidators.addressValidator
     ]),
     customerType: new FormControl('regular', [Validators.required]),
     active: new FormControl(true)
@@ -143,45 +144,5 @@ export class CustomerFormComponent implements OnInit {
   hasError(field: string, error: string): boolean {
     const formControl = this.customerForm.get(field);
     return !!formControl?.touched && !!formControl?.errors?.[error];
-  }
-
-  // Validators customizados
-  emailDomainValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const email = control.value.toLowerCase();
-    const allowedDomains = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com'];
-    const domain = email.split('@')[1];
-
-    if (domain && !allowedDomains.includes(domain)) {
-      return { invalidDomain: true };
-    }
-    return null;
-  }
-
-  phoneValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const phone = control.value.replace(/\D/g, '');
-    if (phone.length !== 11) {
-      return { invalidPhone: true };
-    }
-    return null;
-  }
-
-  ageValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const birthDate = new Date(control.value);
-    const today = new Date();
-    const age = today.getFullYear() - birthDate.getFullYear();
-
-    if (age < 16) {
-      return { tooYoung: true };
-    }
-    if (age > 120) {
-      return { tooOld: true };
-    }
-    return null;
   }
 }

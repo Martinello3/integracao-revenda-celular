@@ -58,13 +58,28 @@ export class PhoneService {
   }
 
   async update(id: number, updatePhoneDto: UpdatePhoneDto) {
+    const existingPhone = await this.phoneRepository.findOne({ where: { id } });
+
+    if (!existingPhone) {
+      throw new NotFoundException(`Celular com ID ${id} não encontrado`);
+    }
+
+    // REGRA DE NEGÓCIO: Modelo único por marca (exceto o próprio celular sendo editado)
+    if (updatePhoneDto.model || updatePhoneDto.brandId) {
+      const model = updatePhoneDto.model || existingPhone.model;
+      const brandId = updatePhoneDto.brandId || existingPhone.brandId;
+
+      const duplicatePhone = await this.phoneRepository.findOne({
+        where: { model, brandId }
+      });
+
+      if (duplicatePhone && duplicatePhone.id !== id) {
+        throw new ConflictException(`Modelo '${model}' já existe para esta marca`);
+      }
+    }
+
     // REGRA DE NEGÓCIO 7: Não permitir redução de preço superior a 50%
     if (updatePhoneDto.price) {
-      const existingPhone = await this.phoneRepository.findOne({ where: { id } });
-
-      if (!existingPhone) {
-        throw new NotFoundException(`Celular com ID ${id} não encontrado`);
-      }
 
       const currentPrice = Number(existingPhone.price);
       const newPrice = Number(updatePhoneDto.price);

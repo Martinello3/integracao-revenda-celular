@@ -45,8 +45,12 @@ export class BrandFormComponent implements OnInit {
           }
         },
         error: (error: any) => {
-          alert('Erro ao carregar a marca com id ' + brandId);
-          console.error(error);
+          console.error('Erro ao carregar marca', error);
+          this.toastController.create({
+            message: 'Erro ao carregar a marca com id ' + brandId,
+            duration: 3000,
+            color: 'danger'
+          }).then(toast => toast.present());
         }
       });
     }
@@ -78,8 +82,12 @@ export class BrandFormComponent implements OnInit {
         if (error.error?.message) {
           errorMessage = error.error.message;
         }
-        alert(errorMessage);
-        console.error(error);
+        console.error('Erro ao salvar a marca', error);
+        this.toastController.create({
+          message: errorMessage,
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }

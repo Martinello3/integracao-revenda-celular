@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { StoreService } from '../services/store.service';
+import { ApplicationValidators } from 'src/app/core/validators/url.validator';
+import { phoneMask, maskitoElement } from '../../core/constants/mask.constants';
 
 @Component({
   selector: 'app-store-form',
@@ -11,29 +13,32 @@ import { StoreService } from '../services/store.service';
   standalone: false,
 })
 export class StoreFormComponent implements OnInit {
+  phoneMask = phoneMask;
+  maskitoElement = maskitoElement;
+
   storeForm: FormGroup = new FormGroup({
     name: new FormControl('', [
       Validators.required,
       Validators.minLength(3),
       Validators.maxLength(100),
-      this.storeNameValidator
+      ApplicationValidators.storeNameValidator
     ]),
     address: new FormControl('', [
       Validators.required,
-      Validators.minLength(10)
+      ApplicationValidators.addressValidator
     ]),
     city: new FormControl('', [
       Validators.required,
-      Validators.pattern(/^[a-zA-ZÀ-ÿ\s]+$/)
+      ApplicationValidators.cityValidator
     ]),
     state: new FormControl('', [Validators.required]),
     phone: new FormControl('', [
       Validators.required,
-      this.phoneValidator
+      ApplicationValidators.storePhoneValidator
     ]),
     manager: new FormControl('', [
       Validators.required,
-      Validators.pattern(/^[a-zA-ZÀ-ÿ\s]+$/)
+      ApplicationValidators.managerValidator
     ]),
     isHeadquarters: new FormControl(false),
     status: new FormControl('active', [Validators.required])
@@ -79,8 +84,12 @@ export class StoreFormComponent implements OnInit {
           }
         },
         error: (error) => {
-          alert('Erro ao carregar a loja com id ' + storeId);
-          console.error(error);
+          console.error('Erro ao carregar loja', error);
+          this.toastController.create({
+            message: 'Erro ao carregar a loja com id ' + storeId,
+            duration: 3000,
+            color: 'danger'
+          }).then(toast => toast.present());
         }
       });
     }
@@ -108,8 +117,12 @@ export class StoreFormComponent implements OnInit {
         if (error.error?.message) {
           errorMessage = error.error.message;
         }
-        alert(errorMessage);
-        console.error(error);
+        console.error('Erro ao salvar a loja', error);
+        this.toastController.create({
+          message: errorMessage,
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
@@ -117,28 +130,5 @@ export class StoreFormComponent implements OnInit {
   hasError(field: string, error: string): boolean {
     const formControl = this.storeForm.get(field);
     return !!formControl?.touched && !!formControl?.errors?.[error];
-  }
-
-  // Validators customizados
-  storeNameValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const name = control.value.toLowerCase();
-    const forbiddenWords = ['loja', 'store', 'shop'];
-
-    if (!forbiddenWords.some(word => name.includes(word))) {
-      return { missingStoreIdentifier: true };
-    }
-    return null;
-  }
-
-  phoneValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const phone = control.value.replace(/\D/g, '');
-    if (phone.length !== 10 && phone.length !== 11) {
-      return { invalidPhone: true };
-    }
-    return null;
   }
 }

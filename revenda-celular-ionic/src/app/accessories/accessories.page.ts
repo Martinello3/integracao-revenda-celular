@@ -41,8 +41,12 @@ export class AccessoriesPage implements OnInit, ViewWillEnter,
         this.accessoriesList = response;
       },
       error: (error) => {
-        alert('Erro ao carregar lista de acessórios');
-        console.error(error);
+        console.error('Erro ao carregar lista de acessórios', error);
+        this.toastController.create({
+          message: 'Erro ao carregar lista de acessórios',
+          duration: 3000,
+          color: 'danger'
+        }).then(toast => toast.present());
       }
     });
   }
@@ -73,8 +77,12 @@ export class AccessoriesPage implements OnInit, ViewWillEnter,
                 if (error.error?.message) {
                   errorMessage = error.error.message;
                 }
-                alert(errorMessage);
-                console.error(error);
+                console.error('Erro ao excluir acessório', error);
+                this.toastController.create({
+                  message: errorMessage,
+                  duration: 3000,
+                  color: 'danger'
+                }).then(toast => toast.present());
               }
             });
           }
