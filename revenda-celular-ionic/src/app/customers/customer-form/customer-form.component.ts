@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { CustomerService } from '../services/customer.service';
-import { dateMask, phoneMask, maskitoElement, parseDateMask, formatDateMask } from 'src/app/core/constants/mask.constants';
+import { dateMask, phoneMask, maskitoElement, parseDateMask, formatDateMask } from '../../core/constants/mask.constants';
 
 @Component({
   selector: 'app-customer-form',
@@ -48,22 +48,32 @@ export class CustomerFormComponent implements OnInit {
   ngOnInit() {
     const customerId = this.activatedRoute.snapshot.params['id'];
     if (customerId) {
-      this.customerService.getById(customerId).subscribe({
+      this.customerService.getById(+customerId).subscribe({
         next: (customer) => {
           if (customer) {
-            this.customerId = customerId;
-            
+            this.customerId = +customerId;
+
+            let formattedBirthDate = '';
             if (customer.birthDate instanceof Date) {
-              customer.birthDate = formatDateMask(customer.birthDate);
-            }
-            if (typeof customer.birthDate === 'string') {
+              formattedBirthDate = formatDateMask(customer.birthDate);
+            } else if (typeof customer.birthDate === 'string') {
               const parsedDate = parseDateMask(customer.birthDate, 'yyyy/mm/dd');
               if (parsedDate) {
-                customer.birthDate = formatDateMask(parsedDate);
+                formattedBirthDate = formatDateMask(parsedDate);
+              } else {
+                formattedBirthDate = customer.birthDate;
               }
             }
-            
-            this.customerForm.patchValue(customer);
+
+            this.customerForm.patchValue({
+              name: customer.name,
+              email: customer.email,
+              phone: customer.phone,
+              birthDate: formattedBirthDate,
+              address: customer.address,
+              customerType: customer.customerType,
+              active: customer.active
+            });
           }
         },
         error: (error) => {
@@ -85,14 +95,16 @@ export class CustomerFormComponent implements OnInit {
 
   save() {
     let { value } = this.customerForm;
-    
+
     if (value.birthDate) {
       const parsedDate = parseDateMask(value.birthDate);
       if (parsedDate) {
         value.birthDate = parsedDate;
       }
     }
-    
+
+    console.log('Salvando cliente:', value);
+
     this.customerService.save({
       ...value,
       id: this.customerId
@@ -105,9 +117,13 @@ export class CustomerFormComponent implements OnInit {
         this.router.navigate(['/customers']);
       },
       error: (error) => {
+        let errorMessage = 'Erro ao salvar o cliente ' + value.name + '!';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
         console.error('Erro ao salvar o cliente', error);
         this.toastController.create({
-          message: 'Erro ao salvar o cliente',
+          message: errorMessage,
           duration: 3000,
           color: 'danger'
         }).then(toast => toast.present());

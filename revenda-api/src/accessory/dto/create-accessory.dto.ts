@@ -5,4 +5,5 @@ export class CreateAccessoryDto {
   category: string;
   image: string;
   stock?: number;
+  compatiblePhoneIds?: number[];
 }

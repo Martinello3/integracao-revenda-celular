@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 import { Customer } from './models/customer.type';
 import { CustomerService } from './services/customer.service';
-import { IonHeader } from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-customers',
@@ -15,7 +14,8 @@ export class CustomersPage implements OnInit {
 
   constructor(
     private customerService: CustomerService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private toastController: ToastController
   ) { }
 
   ngOnInit() {
@@ -67,16 +67,26 @@ export class CustomersPage implements OnInit {
         {
           text: 'Excluir',
           handler: () => {
-            if (customer.id) {
-              this.customerService.delete(customer.id).subscribe({
-                next: () => {
-                  this.loadCustomers();
-                },
-                error: (error) => {
-                  console.error('Erro ao excluir cliente', error);
+            this.customerService.remove(customer).subscribe({
+              next: () => {
+                // Remover da lista usando o ID do cliente original
+                this.customersList = this.customersList.filter((c: Customer) => c.id !== customer.id);
+                this.toastController.create({
+                  message: `Cliente ${customer.name} excluído com sucesso!`,
+                  duration: 3000,
+                  color: 'secondary',
+                  keyboardClose: true,
+                }).then((toast: any) => toast.present());
+              },
+              error: (error: any) => {
+                let errorMessage = 'Erro ao excluir o cliente ' + customer.name;
+                if (error.error?.message) {
+                  errorMessage = error.error.message;
                 }
-              });
-            }
+                window.alert(errorMessage);
+                console.error(error);
+              }
+            });
           }
         }
       ]

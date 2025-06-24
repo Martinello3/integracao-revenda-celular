@@ -3,11 +3,10 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { AccessoryService } from '../services/accessory.service';
-import { PhoneService } from 'src/app/phones/services/phone.service';
-import { Phone } from 'src/app/phones/models/phone.type';
-import { priceMask, maskitoElement, parseNumberMask, formatNumberMask } from 'src/app/core/constants/mask.constants';
-import { ApplicationValidators } from 'src/app/core/validators/url.validator';
-import { IonInput, IonHeader } from "@ionic/angular/standalone";
+import { PhoneService } from '../../phones/services/phone.service';
+import { Phone } from '../../phones/models/phone.type';
+import { ApplicationValidators } from '../../core/validators/url.validator';
+
 
 @Component({
   selector: 'app-accessory-form',
@@ -16,9 +15,6 @@ import { IonInput, IonHeader } from "@ionic/angular/standalone";
   standalone: false,
 })
 export class AccessoryFormComponent implements OnInit {
-
-  priceMask = priceMask;
-  maskitoElement = maskitoElement;
 
   accessoryForm: FormGroup = new FormGroup({
     name: new FormControl('', [
@@ -38,8 +34,8 @@ export class AccessoryFormComponent implements OnInit {
       Validators.required, Validators.min(0), Validators.pattern('^[0-9]*$')
     ])
   });
-  
-  accessoryId!: string;
+
+  accessoryId!: number;
   phones: Phone[] = [];
   categories: string[] = ['Capa', 'Carregador', 'Fone de Ouvido', 'Película', 'Bateria Externa', 'Outro'];
 
@@ -56,14 +52,33 @@ export class AccessoryFormComponent implements OnInit {
     
     const accessoryId = this.activatedRoute.snapshot.params['id'];
     if (accessoryId) {
-      this.accessoryService.getById(accessoryId).subscribe({
+      this.accessoryService.getById(+accessoryId).subscribe({
         next: (accessory) => {
           if (accessory) {
-            this.accessoryId = accessoryId;
-            if (accessory.price && typeof accessory.price === 'number') {
-              accessory.price = formatNumberMask(accessory.price);
+            this.accessoryId = +accessoryId;
+
+            // Tratar preço como number
+            let priceValue = 0;
+            if (accessory.price) {
+              if (typeof accessory.price === 'number') {
+                priceValue = accessory.price;
+              } else if (typeof accessory.price === 'string') {
+                priceValue = parseFloat(accessory.price) || 0;
+              }
             }
-            this.accessoryForm.patchValue(accessory);
+
+            console.log('Carregando acessório:', accessory);
+            console.log('Celulares compatíveis do acessório:', accessory.compatiblePhones);
+
+            this.accessoryForm.patchValue({
+              name: accessory.name,
+              description: accessory.description,
+              price: priceValue,
+              category: accessory.category,
+              image: accessory.image,
+              compatiblePhones: accessory.compatiblePhones || [],
+              stock: accessory.stock
+            });
           }
         },
         error: (error) => {
@@ -97,10 +112,15 @@ export class AccessoryFormComponent implements OnInit {
 
   save() {
     let { value } = this.accessoryForm;
-    if (value.price) {
-      value.price = parseNumberMask(value.price);
-    }
-    
+
+    // Garantir que o preço seja number
+    value.price = Number(value.price) || 0;
+    // Garantir que o stock seja number
+    value.stock = Number(value.stock) || 0;
+
+    console.log('Salvando acessório - Dados do formulário:', value);
+    console.log('Celulares compatíveis selecionados:', value.compatiblePhones);
+
     this.accessoryService.save({
       ...value,
       id: this.accessoryId
@@ -113,7 +133,11 @@ export class AccessoryFormComponent implements OnInit {
         this.router.navigate(['/accessories']);
       },
       error: (error) => {
-        alert('Erro ao salvar o acessório ' + value.name + '!');
+        let errorMessage = 'Erro ao salvar o acessório ' + value.name + '!';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        alert(errorMessage);
         console.error(error);
       }
     });

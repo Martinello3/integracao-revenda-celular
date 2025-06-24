@@ -58,8 +58,9 @@ export class AccessoriesPage implements OnInit, ViewWillEnter,
           text: 'Sim',
           handler: () => {
             this.accessoryService.remove(accessory).subscribe({
-              next: (response) => {
-                this.accessoriesList = this.accessoriesList.filter(a => a.id !== response.id);
+              next: () => {
+                // Remover da lista usando o ID do acessório original
+                this.accessoriesList = this.accessoriesList.filter(a => a.id !== accessory.id);
                 this.toastController.create({
                   message: `Acessório ${accessory.name} excluído com sucesso!`,
                   duration: 3000,
@@ -68,7 +69,11 @@ export class AccessoriesPage implements OnInit, ViewWillEnter,
                 }).then(toast => toast.present());
               },
               error: (error) => {
-                alert('Erro ao excluir o acessório ' + accessory.name);
+                let errorMessage = 'Erro ao excluir o acessório ' + accessory.name;
+                if (error.error?.message) {
+                  errorMessage = error.error.message;
+                }
+                alert(errorMessage);
                 console.error(error);
               }
             });

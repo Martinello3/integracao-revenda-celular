@@ -75,8 +75,9 @@ export class StoresPage implements OnInit, ViewWillEnter,
           text: 'Sim',
           handler: () => {
             this.storeService.remove(store).subscribe({
-              next: (response) => {
-                this.storesList = this.storesList.filter(s => s.id !== response.id);
+              next: () => {
+                // Remover da lista usando o ID da loja original
+                this.storesList = this.storesList.filter(s => s.id !== store.id);
                 this.toastController.create({
                   message: `Loja ${store.name} excluída com sucesso!`,
                   duration: 3000,
@@ -85,7 +86,11 @@ export class StoresPage implements OnInit, ViewWillEnter,
                 }).then(toast => toast.present());
               },
               error: (error) => {
-                alert('Erro ao excluir a loja ' + store.name);
+                let errorMessage = 'Erro ao excluir a loja ' + store.name;
+                if (error.error?.message) {
+                  errorMessage = error.error.message;
+                }
+                alert(errorMessage);
                 console.error(error);
               }
             });

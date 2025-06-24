@@ -15,11 +15,10 @@ import { HttpClientModule } from '@angular/common/http';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     IonicModule,
     AccessoriesPageRoutingModule,
     MaskitoDirective,
-    FormsModule,
-    ReactiveFormsModule,
     HttpClientModule,
   ],
   declarations: [

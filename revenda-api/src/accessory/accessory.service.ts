@@ -1,18 +1,21 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm';
+import { Repository, MoreThan, In } from 'typeorm';
 import { Accessory } from './accessory.entity';
 import { CreateAccessoryDto } from './dto/create-accessory.dto';
 import { UpdateAccessoryDto } from './dto/update-accessory.dto';
+import { Phone } from '../phone/phone.entity';
 
 @Injectable()
 export class AccessoryService {
   constructor(
     @InjectRepository(Accessory)
     private accessoryRepository: Repository<Accessory>,
+    @InjectRepository(Phone)
+    private phoneRepository: Repository<Phone>,
   ) {}
 
-  create(createAccessoryDto: CreateAccessoryDto) {
+  async create(createAccessoryDto: CreateAccessoryDto) {
     // REGRA DE NEGÓCIO 7: Não permitir criar acessórios com preço negativo
     if (createAccessoryDto.price < 0) {
       throw new BadRequestException(
@@ -20,7 +23,17 @@ export class AccessoryService {
       );
     }
 
-    const accessory = this.accessoryRepository.create(createAccessoryDto);
+    const { compatiblePhoneIds, ...accessoryData } = createAccessoryDto;
+    const accessory = this.accessoryRepository.create(accessoryData);
+
+    // Se há celulares compatíveis, buscar e associar
+    if (compatiblePhoneIds && compatiblePhoneIds.length > 0) {
+      const phones = await this.phoneRepository.find({
+        where: { id: In(compatiblePhoneIds) }
+      });
+      accessory.compatiblePhones = phones;
+    }
+
     return this.accessoryRepository.save(accessory);
   }
 
@@ -65,8 +78,33 @@ export class AccessoryService {
       .getMany();
   }
 
-  update(id: number, updateAccessoryDto: UpdateAccessoryDto) {
-    return this.accessoryRepository.update(id, updateAccessoryDto);
+  async update(id: number, updateAccessoryDto: UpdateAccessoryDto) {
+    const { compatiblePhoneIds, ...accessoryData } = updateAccessoryDto;
+
+    // Atualizar dados básicos do acessório
+    await this.accessoryRepository.update(id, accessoryData);
+
+    // Se há celulares compatíveis para atualizar
+    if (compatiblePhoneIds !== undefined) {
+      const accessory = await this.accessoryRepository.findOne({
+        where: { id },
+        relations: ['compatiblePhones']
+      });
+
+      if (accessory) {
+        if (compatiblePhoneIds.length > 0) {
+          const phones = await this.phoneRepository.find({
+            where: { id: In(compatiblePhoneIds) }
+          });
+          accessory.compatiblePhones = phones;
+        } else {
+          accessory.compatiblePhones = [];
+        }
+        await this.accessoryRepository.save(accessory);
+      }
+    }
+
+    return { message: 'Acessório atualizado com sucesso' };
   }
 
   async updateStock(id: number, quantity: number) {

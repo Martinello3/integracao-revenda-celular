@@ -47,11 +47,20 @@ export class StoreFormComponent implements OnInit {
   ngOnInit() {
     const storeId = this.activatedRoute.snapshot.params['id'];
     if (storeId) {
-      this.storeService.getById(storeId).subscribe({
+      this.storeService.getById(+storeId).subscribe({
         next: (store) => {
           if (store) {
-            this.storeId = storeId;
-            this.storeForm.patchValue(store);
+            this.storeId = +storeId;
+            this.storeForm.patchValue({
+              name: store.name,
+              address: store.address,
+              city: store.city,
+              state: store.state,
+              phone: store.phone,
+              manager: store.manager,
+              isHeadquarters: store.isHeadquarters,
+              status: store.status
+            });
           }
         },
         error: (error) => {
@@ -69,7 +78,9 @@ export class StoreFormComponent implements OnInit {
 
   save() {
     const { value } = this.storeForm;
-    
+
+    console.log('Salvando loja:', value);
+
     this.storeService.save({
       ...value,
       id: this.storeId
@@ -82,7 +93,11 @@ export class StoreFormComponent implements OnInit {
         this.router.navigate(['/stores']);
       },
       error: (error) => {
-        alert('Erro ao salvar a loja ' + value.name + '!');
+        let errorMessage = 'Erro ao salvar a loja ' + value.name + '!';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        alert(errorMessage);
         console.error(error);
       }
     });
