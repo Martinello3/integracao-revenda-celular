@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { dateMask, priceMask, maskitoElement, parseDateMask, formatDateMask, parseNumberMask, formatNumberMask } from 'src/app/core/constants/mask.constants';
-import { ApplicationValidators } from 'src/app/core/validators/url.validator';
+import { dateMask, maskitoElement, parseDateMask, formatDateMask } from '../../core/constants/mask.constants';
+import { ApplicationValidators } from '../../core/validators/url.validator';
 import { PhoneService } from '../services/phone.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BrandService } from 'src/app/brands/services/brand.service';
-import { Brand } from 'src/app/brands/models/brand.type';
+import { BrandService } from '../../brands/services/brand.service';
+import { Brand } from '../../brands/models/brand.type';
 import { ToastController } from '@ionic/angular';
-import { maskitoParseNumber, maskitoStringifyNumber } from '@maskito/kit';
+
 
 @Component({
   selector: 'app-phone-form',
@@ -18,7 +18,6 @@ import { maskitoParseNumber, maskitoStringifyNumber } from '@maskito/kit';
 export class PhoneFormComponent implements OnInit {
 
   dateMask = dateMask;
-  priceMask = priceMask;
   maskitoElement = maskitoElement;
   
   // Lista de categorias predefinidas em português do Brasil
@@ -44,7 +43,7 @@ export class PhoneFormComponent implements OnInit {
     releaseDate: new FormControl(''),
     price: new FormControl(0, [Validators.required, Validators.min(0)]),
     category: new FormControl('', Validators.required),
-    brands: new FormControl('', Validators.required)
+    brandId: new FormControl(null, Validators.required)
   });
   phoneId!: number;
   brands: Brand[] = []
@@ -58,10 +57,10 @@ export class PhoneFormComponent implements OnInit {
   ) {
     const phoneId = this.activatedRoute.snapshot.params['id'];
     if (phoneId) {
-      this.phoneService.getById(phoneId).subscribe({
+      this.phoneService.getById(+phoneId).subscribe({
         next: (phone) => {
           if (phone) {
-            this.phoneId = phoneId;
+            this.phoneId = +phoneId;
             if (phone.releaseDate instanceof Date) {
               phone.releaseDate = formatDateMask(phone.releaseDate);
             }
@@ -71,10 +70,25 @@ export class PhoneFormComponent implements OnInit {
                 phone.releaseDate = formatDateMask(parsedDate);
               }
             }
-            if (phone.price && typeof phone.price === 'number') {
-              phone.price = formatNumberMask(phone.price);
+            // Tratar preço como number
+            let priceValue = 0;
+            if (phone.price) {
+              if (typeof phone.price === 'number') {
+                priceValue = phone.price;
+              } else if (typeof phone.price === 'string') {
+                priceValue = parseFloat(phone.price) || 0;
+              }
             }
-            this.phoneForm.patchValue(phone);
+
+            // Usar brandId em vez de brands
+            this.phoneForm.patchValue({
+              model: phone.model,
+              image: phone.image,
+              releaseDate: phone.releaseDate,
+              price: priceValue,
+              category: phone.category,
+              brandId: phone.brandId
+            });
           }
         },
         error: (error) => {
@@ -97,8 +111,8 @@ export class PhoneFormComponent implements OnInit {
     });
   }
 
-  compareWith(o1: Brand | null, o2: Brand | null): boolean {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
+  compareWith(o1: number | null, o2: number | null): boolean {
+    return o1 === o2;
   }
 
 
@@ -115,8 +129,11 @@ export class PhoneFormComponent implements OnInit {
         value.releaseDate = parsedDate;
       }
     }
-    if (value.price) {
-      value.price = parseNumberMask(value.price);
+    // Garantir que o preço seja number
+    value.price = Number(value.price) || 0;
+    // Garantir que brandId seja number
+    if (value.brandId) {
+      value.brandId = +value.brandId;
     }
     console.log(value);
     this.phoneService.save({
@@ -131,7 +148,11 @@ export class PhoneFormComponent implements OnInit {
         this.router.navigate(['/phones']);
       },
       error: (error) => {
-        alert('Erro ao salvar o celular ' + value.model + '!');
+        let errorMessage = 'Erro ao salvar o celular ' + value.model + '!';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        alert(errorMessage);
         console.error(error);
       }
     });

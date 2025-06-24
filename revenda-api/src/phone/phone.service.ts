@@ -25,7 +25,14 @@ export class PhoneService {
       throw new ConflictException(`Celular '${createPhoneDto.model}' já existe para esta marca`);
     }
 
-    const phone = this.phoneRepository.create(createPhoneDto);
+    // Garantir que price e brandId sejam numbers
+    const phoneData = {
+      ...createPhoneDto,
+      price: Number(createPhoneDto.price),
+      brandId: Number(createPhoneDto.brandId)
+    };
+
+    const phone = this.phoneRepository.create(phoneData);
     return this.phoneRepository.save(phone);
   }
 
@@ -69,7 +76,16 @@ export class PhoneService {
       }
     }
 
-    return this.phoneRepository.update(id, updatePhoneDto);
+    // Garantir que os tipos sejam corretos
+    const updateData = { ...updatePhoneDto };
+    if (updateData.price !== undefined) {
+      updateData.price = Number(updateData.price);
+    }
+    if (updateData.brandId !== undefined) {
+      updateData.brandId = Number(updateData.brandId);
+    }
+
+    return this.phoneRepository.update(id, updateData);
   }
 
   async remove(id: number) {

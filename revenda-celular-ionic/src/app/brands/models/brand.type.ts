@@ -1,5 +1,12 @@
 export type Brand = {
-  id: string;
+  id: number;
   name: string;
-  country?: string;
+  country: string;
 }
+
+export type CreateBrandDto = {
+  name: string;
+  country: string;
+}
+
+export type UpdateBrandDto = Partial<CreateBrandDto>

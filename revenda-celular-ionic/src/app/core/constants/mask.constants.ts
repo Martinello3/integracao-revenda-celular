@@ -8,10 +8,10 @@ import {
 
 const dateMask = maskitoDateOptionsGenerator({ mode: 'dd/mm/yyyy', separator: '/' });
 const priceMask = maskitoNumberOptionsGenerator({
-  decimalSeparator: ',',
+  decimalSeparator: '.',
   min: 0,
   precision: 2,
-  thousandSeparator: '.'
+  thousandSeparator: ','
 });
 
 // Máscara de telefone brasileira simples (sem dependência do @maskito/phone)
@@ -48,15 +48,17 @@ const formatDateMask = (date: Date): string => {
 
 const parseNumberMask = (value: string): number => {
   if (!value) return 0;
-  const cleanValue = value.replace(/\./g, '').replace(',', '.');
-  return parseFloat(cleanValue);
+  // Remove separadores de milhares e mantém apenas o ponto decimal
+  const cleanValue = value.replace(/,/g, '');
+  return parseFloat(cleanValue) || 0;
 }
 
 const formatNumberMask = (value: number): string => {
+  if (!value || isNaN(value)) return '0.00';
   return maskitoStringifyNumber(value, {
-    decimalSeparator: ',',
+    decimalSeparator: '.',
     precision: 2,
-    thousandSeparator: '.'
+    thousandSeparator: ','
   });
 }
 

@@ -55,8 +55,8 @@ export class PhonesPage implements OnInit, ViewWillEnter,
           text: 'Sim',
           handler: () => {
             this.phoneService.remove(phone).subscribe({
-              next: (response) => {
-                this.phonesList = this.phonesList.filter(p => p.id !== response.id);
+              next: () => {
+                this.phonesList = this.phonesList.filter(p => p.id !== phone.id);
                 this.toastController.create({
                   message: `Celular ${phone.model} excluído com sucesso!`,
                   duration: 3000,
@@ -65,7 +65,11 @@ export class PhonesPage implements OnInit, ViewWillEnter,
                 }).then(toast => toast.present());
               },
               error: (error) => {
-                alert('Erro ao excluir o celular ' + phone.model);
+                let errorMessage = 'Erro ao excluir o celular ' + phone.model;
+                if (error.error?.message) {
+                  errorMessage = error.error.message;
+                }
+                alert(errorMessage);
                 console.error(error);
               }
             });

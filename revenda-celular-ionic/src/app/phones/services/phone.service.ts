@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Phone } from '../models/phone.type';
+import { Phone, CreatePhoneDto, UpdatePhoneDto } from '../models/phone.type';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -13,7 +13,7 @@ export class PhoneService {
 
   constructor(private http: HttpClient) { }
 
-  getById(phoneId: string): Observable<Phone> {
+  getById(phoneId: number): Observable<Phone> {
     return this.http.get<Phone>(`${this.apiUrl}/${phoneId}`);
   }
 
@@ -21,19 +21,43 @@ export class PhoneService {
     return this.http.get<Phone[]>(this.apiUrl);
   }
 
-  private add(phone: Phone): Observable<Phone> {
+  getByBrand(brandId: number): Observable<Phone[]> {
+    return this.http.get<Phone[]>(`${this.apiUrl}/brand/${brandId}`);
+  }
+
+  private add(phone: CreatePhoneDto): Observable<Phone> {
     return this.http.post<Phone>(this.apiUrl, phone);
   }
 
-  private update(phone: Phone): Observable<Phone> {
-    return this.http.put<Phone>(`${this.apiUrl}/${phone.id}`, phone);
+  private update(id: number, phone: UpdatePhoneDto): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}`, phone);
   }
 
-  save(phone: Phone): Observable<Phone> {
-    return phone.id ? this.update(phone) : this.add(phone);
+  save(phone: Phone): Observable<any> {
+    if (phone.id) {
+      const updateData: UpdatePhoneDto = {
+        model: phone.model,
+        image: phone.image,
+        releaseDate: phone.releaseDate,
+        price: typeof phone.price === 'string' ? parseFloat(phone.price) : phone.price,
+        category: phone.category,
+        brandId: phone.brandId
+      };
+      return this.update(phone.id, updateData);
+    } else {
+      const createData: CreatePhoneDto = {
+        model: phone.model,
+        image: phone.image,
+        releaseDate: phone.releaseDate,
+        price: typeof phone.price === 'string' ? parseFloat(phone.price) : phone.price,
+        category: phone.category,
+        brandId: phone.brandId
+      };
+      return this.add(createData);
+    }
   }
 
-  remove(phone: Phone): Observable<Phone> {
-    return this.http.delete<Phone>(`${this.apiUrl}/${phone.id}`);
+  remove(phone: Phone): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${phone.id}`);
   }
 }

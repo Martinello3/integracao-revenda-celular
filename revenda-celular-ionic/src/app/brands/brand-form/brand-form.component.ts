@@ -22,7 +22,7 @@ export class BrandFormComponent implements OnInit {
     ])
   });
   
-  brandId!: string;
+  brandId!: number;
 
   constructor(
     private brandService: BrandService,
@@ -34,11 +34,14 @@ export class BrandFormComponent implements OnInit {
   ngOnInit() {
     const brandId = this.activatedRoute.snapshot.params['id'];
     if (brandId) {
-      this.brandService.getById(brandId).subscribe({
+      this.brandService.getById(+brandId).subscribe({
         next: (brand: Brand) => {
           if (brand) {
-            this.brandId = brandId;
-            this.brandForm.patchValue(brand);
+            this.brandId = +brandId;
+            this.brandForm.patchValue({
+              name: brand.name,
+              country: brand.country
+            });
           }
         },
         error: (error: any) => {
@@ -56,6 +59,8 @@ export class BrandFormComponent implements OnInit {
 
   save() {
     const { value } = this.brandForm;
+    console.log('Salvando marca:', value);
+
     this.brandService.save({
       ...value,
       id: this.brandId
@@ -69,7 +74,11 @@ export class BrandFormComponent implements OnInit {
         this.router.navigate(['/brands']);
       },
       error: (error: any) => {
-        alert('Erro ao salvar a marca ' + value.name + '!');
+        let errorMessage = 'Erro ao salvar a marca ' + value.name + '!';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        alert(errorMessage);
         console.error(error);
       }
     });

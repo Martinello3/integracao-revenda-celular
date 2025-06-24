@@ -46,8 +46,9 @@ export class BrandsPage implements OnInit, ViewDidEnter {
           text: 'Sim',
           handler: () => {
             this.brandService.remove(brand).subscribe({
-              next: (response) => {
-                this.brandsList = this.brandsList.filter(b => b.id !== response.id);
+              next: () => {
+                // Remover da lista usando o ID da marca original
+                this.brandsList = this.brandsList.filter(b => b.id !== brand.id);
                 this.toastController.create({
                   message: `Marca ${brand.name} excluída com sucesso!`,
                   duration: 3000,
@@ -56,7 +57,11 @@ export class BrandsPage implements OnInit, ViewDidEnter {
                 }).then(toast => toast.present());
               },
               error: (error) => {
-                alert('Erro ao excluir a marca ' + brand.name);
+                let errorMessage = 'Erro ao excluir a marca ' + brand.name;
+                if (error.error?.message) {
+                  errorMessage = error.error.message;
+                }
+                alert(errorMessage);
                 console.error(error);
               }
             });
